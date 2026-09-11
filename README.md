@@ -1,8 +1,9 @@
 # ポートフォリオサイト
 
-`https://nerunell11.github.io/` で公開しているポートフォリオサイトのソースです。
+ポートフォリオサイトのソースです。ビルド不要の静的サイト（HTML / CSS / JavaScript のみ）。
 
-ビルド不要の静的サイト（HTML / CSS / JavaScript のみ）で、`main` ブランチに push すると GitHub Pages が自動で公開内容を更新します。
+**現在このリポジトリは private です。** まだ Web サイトとしては公開されていません。
+文章を埋め終わったら「公開する」の手順で public に切り替えると、`https://nerunell11.github.io/` で見られるようになります。
 
 ## ファイル構成
 
@@ -52,7 +53,13 @@
 
 `js/skills-data.js` の `SKILLS` を編集します。`level` は 1〜5 で、そのままバーの長さになります。
 
-## 公開する
+## 別のPCで編集する
+
+```bash
+git clone https://github.com/Nerunell11/Nerunell11.github.io.git
+```
+
+編集したら、いつも通り push します。
 
 ```bash
 git add -A
@@ -60,7 +67,19 @@ git commit -m "作品を追加"
 git push
 ```
 
-push から1分ほどでサイトに反映されます。反映状況は GitHub のリポジトリページの Actions / Settings → Pages から確認できます。
+## 公開する（初回だけ）
+
+文章とスクリーンショットが揃ったら、private から public に切り替えて GitHub Pages を有効化します。
+
+```bash
+gh repo edit Nerunell11/Nerunell11.github.io --visibility public --accept-visibility-change-consequences
+```
+
+```bash
+gh api -X POST repos/Nerunell11/Nerunell11.github.io/pages -f "source[branch]=main" -f "source[path]=/"
+```
+
+数分で `https://nerunell11.github.io/` が見られるようになります。以降は push するだけで1分ほどで反映されます。反映状況はリポジトリページの Actions / Settings → Pages から確認できます。
 
 ## 配色を変えたいとき
 
