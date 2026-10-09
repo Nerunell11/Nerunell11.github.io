@@ -1,5 +1,5 @@
 ---
-title: DX21_X01
+title: GemPuzzle
 year: "2025"
 category: 個人制作
 role: 【担当範囲を記入】

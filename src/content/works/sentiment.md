@@ -1,5 +1,5 @@
 ---
-title: Aurea
+title: Sentiment
 year: "2026"
 category: チーム制作
 role: 【担当範囲を記入】
