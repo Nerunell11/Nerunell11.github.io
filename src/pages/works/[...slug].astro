@@ -1,0 +1,423 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const works = (
+    await getCollection('works', ({ data }) => import.meta.env.DEV || !data.draft)
+  ).sort((a, b) => a.data.order - b.data.order || b.data.year.localeCompare(a.data.year));
+
+  return works.map((work, i) => ({
+    params: { slug: work.id },
+    props: {
+      work,
+      prev: works[i - 1] ?? null,
+      next: works[i + 1] ?? null,
+    },
+  }));
+}
+
+interface Props {
+  work: CollectionEntry<'works'>;
+  prev: CollectionEntry<'works'> | null;
+  next: CollectionEntry<'works'> | null;
+}
+
+const { work, prev, next } = Astro.props;
+const { Content } = await render(work);
+const d = work.data;
+---
+
+<Base title={d.title} description={d.summary} padTop>
+  <article class="work">
+    <!-- 見出し -->
+    <header class="wrap head">
+      <a class="back mono-label" href="/#works">← Works</a>
+
+      <p class="meta">
+        <span>{d.year}</span>
+        <span class="dot" aria-hidden="true"></span>
+        <span>{d.category}</span>
+      </p>
+
+      <h1 class="display title">{d.title}</h1>
+      <p class="summary">{d.summary}</p>
+    </header>
+
+    {
+      d.cover && (
+        <div class="wrap cover">
+          <img src={d.cover} alt={`${d.title} のスクリーンショット`} />
+        </div>
+      )
+    }
+
+    <!-- 本文とサイドの情報 -->
+    <div class="wrap grid">
+      <div class="prose">
+        <Content />
+      </div>
+
+      <aside class="side">
+        <section class="block">
+          <h2 class="mono-label">担当</h2>
+          <p>{d.role}</p>
+        </section>
+
+        <section class="block">
+          <h2 class="mono-label">使用技術</h2>
+          <ul class="tags">
+            {d.tech.map((t) => <li class="tag tag-accent">{t}</li>)}
+          </ul>
+        </section>
+
+        {
+          d.links.length > 0 && (
+            <section class="block">
+              <h2 class="mono-label">リンク</h2>
+              <ul class="links">
+                {d.links.map((link) => (
+                  <li>
+                    <a href={link.url} target="_blank" rel="noopener">
+                      {link.label}
+                      <span aria-hidden="true">↗</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+      </aside>
+    </div>
+
+    <!-- 前後の作品 -->
+    <nav class="wrap pager" aria-label="他の作品">
+      {
+        prev ? (
+          <a class="pager-link prev" href={`/works/${prev.id}/`}>
+            <span class="mono-label">← Prev</span>
+            <span class="pager-title">{prev.data.title}</span>
+          </a>
+        ) : (
+          <span />
+        )
+      }
+      {
+        next ? (
+          <a class="pager-link next" href={`/works/${next.id}/`}>
+            <span class="mono-label">Next →</span>
+            <span class="pager-title">{next.data.title}</span>
+          </a>
+        ) : (
+          <span />
+        )
+      }
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .work {
+    position: relative;
+    z-index: 2;
+    padding-bottom: clamp(72px, 10vw, 140px);
+  }
+
+  .head {
+    max-width: 920px;
+    margin-bottom: clamp(32px, 5vw, 56px);
+  }
+
+  .back {
+    display: inline-block;
+    margin-bottom: 28px;
+    color: var(--text-faint);
+    transition: color 0.25s var(--ease);
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 18px;
+  }
+
+  .dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .title {
+    font-size: clamp(2.6rem, 9vw, 6rem);
+    margin-bottom: 24px;
+  }
+
+  .summary {
+    max-width: 60ch;
+    font-size: clamp(1rem, 1.7vw, 1.2rem);
+    color: var(--text-dim);
+  }
+
+  .cover {
+    margin-bottom: clamp(40px, 6vw, 72px);
+  }
+
+  .cover img {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: clamp(32px, 6vw, 80px);
+    align-items: start;
+  }
+
+  /* ---------- 本文 ---------- */
+  .prose {
+    max-width: 72ch;
+    color: var(--text-dim);
+    font-size: 1rem;
+    line-height: 2;
+  }
+
+  .prose :global(h2) {
+    font-family: var(--f-display);
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    color: var(--text);
+    margin: 2.4em 0 0.8em;
+    padding-top: 1.2em;
+    border-top: 1px solid var(--line);
+  }
+
+  .prose :global(h2:first-child) {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .prose :global(h3) {
+    font-family: var(--f-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 1.8em 0 0.6em;
+  }
+
+  .prose :global(p) {
+    margin: 1.2em 0;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 1.2em 0;
+    padding-left: 1.4em;
+    list-style: disc;
+  }
+
+  .prose :global(ol) {
+    list-style: decimal;
+  }
+
+  .prose :global(li) {
+    margin: 0.4em 0;
+  }
+
+  .prose :global(li::marker) {
+    color: var(--accent);
+  }
+
+  .prose :global(a) {
+    color: var(--accent-hi);
+    border-bottom: 1px solid var(--accent-line);
+  }
+
+  .prose :global(a:hover) {
+    color: var(--accent);
+  }
+
+  .prose :global(strong) {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .prose :global(img) {
+    width: 100%;
+    margin: 2em 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .prose :global(blockquote) {
+    margin: 1.6em 0;
+    padding: 4px 0 4px 22px;
+    border-left: 2px solid var(--accent);
+    color: var(--text-dim);
+  }
+
+  .prose :global(code) {
+    font-family: var(--f-mono);
+    font-size: 0.86em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: var(--surface-hi);
+    color: var(--accent-warm);
+  }
+
+  .prose :global(pre) {
+    margin: 1.8em 0;
+    padding: 20px 22px;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-sink) !important;
+    line-height: 1.7;
+  }
+
+  .prose :global(pre code) {
+    padding: 0;
+    background: none;
+    color: inherit;
+    font-size: 0.84rem;
+  }
+
+  .prose :global(table) {
+    width: 100%;
+    margin: 1.8em 0;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .prose :global(th),
+  .prose :global(td) {
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    text-align: left;
+  }
+
+  .prose :global(th) {
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--f-mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- サイド ---------- */
+  .side {
+    position: sticky;
+    top: calc(var(--header-h) + 32px);
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding: 26px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .block h2 {
+    margin-bottom: 12px;
+  }
+
+  .block p {
+    font-size: 0.92rem;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--accent-hi);
+    transition: color 0.25s var(--ease);
+  }
+
+  .links a:hover {
+    color: var(--accent);
+  }
+
+  /* ---------- 前後 ---------- */
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: clamp(56px, 8vw, 100px);
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+
+  .pager-link {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px 24px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    transition:
+      border-color 0.3s var(--ease),
+      background-color 0.3s var(--ease);
+  }
+
+  .pager-link:hover {
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+
+  .pager-link.next {
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  .pager-title {
+    font-family: var(--f-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .side {
+      position: static;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .pager {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,229 @@
+---
+/**
+ * 作品一覧の1行。
+ * 小さいカードを並べるのをやめ、1件を大きく見せる。
+ * 偶数番目は CSS で左右を入れ替えて、スクロールに律動をつける。
+ */
+interface Props {
+  slug: string;
+  index: number;
+  title: string;
+  year: string;
+  category: string;
+  role: string;
+  tech: string[];
+  summary: string;
+  cover?: string;
+}
+
+const { slug, index, title, year, category, role, tech, summary, cover } = Astro.props;
+const num = String(index + 1).padStart(2, '0');
+---
+
+<article class="row" data-tech={tech.join('|')} data-reveal>
+  <a class="row-link" href={`/works/${slug}/`} aria-label={`${title} の詳細を見る`}>
+    <div class="visual">
+      {
+        cover ? (
+          <img src={cover} alt={`${title} のスクリーンショット`} loading="lazy" decoding="async" />
+        ) : (
+          <span class="ph" aria-hidden="true">
+            {title.trim().charAt(0).toUpperCase()}
+          </span>
+        )
+      }
+      <span class="num" aria-hidden="true">{num}</span>
+    </div>
+
+    <div class="body">
+      <p class="meta">
+        <span>{year}</span>
+        <span class="dot" aria-hidden="true"></span>
+        <span>{category}</span>
+      </p>
+
+      <h3 class="title display">{title}</h3>
+
+      <p class="role"><span>担当</span>{role}</p>
+      <p class="summary">{summary}</p>
+
+      <ul class="tags">
+        {tech.map((t) => <li class="tag">{t}</li>)}
+      </ul>
+
+      <span class="more mono-label">
+        View work
+        <span class="arrow" aria-hidden="true">→</span>
+      </span>
+    </div>
+  </a>
+</article>
+
+<style>
+  .row {
+    border-top: 1px solid var(--line);
+  }
+
+  .row:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row-link {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: clamp(24px, 5vw, 72px);
+    align-items: center;
+    padding: clamp(28px, 4vw, 52px) 0;
+    transition: background-color 0.4s var(--ease);
+  }
+
+  .row-link:hover {
+    background: linear-gradient(90deg, var(--accent-soft), transparent 70%);
+  }
+
+  /* 偶数番目は左右を反転させる */
+  .row:nth-child(even) .visual {
+    order: 2;
+  }
+
+  .visual {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-raise);
+    display: grid;
+    place-items: center;
+  }
+
+  .visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition:
+      transform 0.7s var(--ease),
+      filter 0.5s var(--ease);
+    filter: grayscale(0.35) contrast(1.05);
+  }
+
+  .row-link:hover .visual img {
+    transform: scale(1.04);
+    filter: none;
+  }
+
+  /* 画像が無いときの代替。文字だけで寂しくならないよう熱源を置く。 */
+  .ph {
+    font-family: var(--f-display);
+    font-size: clamp(3rem, 9vw, 6rem);
+    font-weight: 700;
+    color: rgba(244, 242, 239, 0.14);
+  }
+
+  .visual::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(90% 70% at 25% 15%, rgba(255, 107, 44, 0.16), transparent 65%);
+    pointer-events: none;
+  }
+
+  .num {
+    position: absolute;
+    left: 14px;
+    bottom: 8px;
+    font-family: var(--f-mono);
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.85;
+    mix-blend-mode: screen;
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 14px;
+  }
+
+  .dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .title {
+    font-size: clamp(1.8rem, 4.5vw, 3rem);
+    margin-bottom: 16px;
+    transition: color 0.3s var(--ease);
+  }
+
+  .row-link:hover .title {
+    color: var(--accent-hi);
+  }
+
+  .role {
+    display: flex;
+    gap: 12px;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .role span {
+    flex: none;
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    padding-top: 0.35em;
+  }
+
+  .summary {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 24px;
+  }
+
+  .more {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+  }
+
+  .arrow {
+    display: inline-block;
+    transition: transform 0.35s var(--ease);
+  }
+
+  .row-link:hover .arrow {
+    transform: translateX(7px);
+  }
+
+  @media (max-width: 860px) {
+    .row-link {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .row:nth-child(even) .visual {
+      order: 0;
+    }
+  }
+</style>

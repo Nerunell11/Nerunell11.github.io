@@ -1,0 +1,241 @@
+---
+import { SITE } from '../data/site';
+
+/** トップ以外のページでは、アンカーがトップのセクションを指すようにする */
+const home = Astro.url.pathname === '/' ? '' : '/';
+
+const links = [
+  { label: 'About', href: `${home}#about` },
+  { label: 'Works', href: `${home}#works` },
+  { label: 'Skills', href: `${home}#skills` },
+  { label: 'Contact', href: `${home}#contact` },
+];
+---
+
+<header class="bar" id="site-header">
+  <div class="wrap bar-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">{SITE.name}</span>
+    </a>
+
+    <button class="burger" id="burger" aria-expanded="false" aria-controls="nav" aria-label="メニューを開く">
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav class="nav" id="nav" aria-label="メインナビゲーション">
+      <ul>
+        {
+          links.map((link, i) => (
+            <li>
+              <a href={link.href}>
+                <span class="idx">{String(i + 1).padStart(2, '0')}</span>
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .bar {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 100;
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid transparent;
+    transition:
+      background-color 0.3s var(--ease),
+      border-color 0.3s var(--ease);
+  }
+
+  .bar.stuck {
+    background: rgba(8, 9, 12, 0.72);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom-color: var(--line);
+  }
+
+  .bar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+  }
+
+  .brand-mark {
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+    /* 四角を少し傾けて、ただのドットに見せない */
+    transform: rotate(45deg);
+    transition: transform 0.4s var(--ease);
+  }
+
+  .brand:hover .brand-mark {
+    transform: rotate(135deg) scale(1.15);
+  }
+
+  .nav ul {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 7px;
+    padding: 9px 14px;
+    font-family: var(--f-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    transition: color 0.25s var(--ease);
+  }
+
+  .nav a:hover {
+    color: var(--text);
+  }
+
+  .idx {
+    font-size: 0.62rem;
+    color: var(--accent);
+    opacity: 0.75;
+  }
+
+  .burger {
+    display: none;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--line-hi);
+    border-radius: var(--radius);
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .burger span {
+    position: absolute;
+    left: 13px;
+    width: 18px;
+    height: 1.5px;
+    background: var(--text);
+    transition: transform 0.3s var(--ease);
+  }
+
+  .burger span:nth-child(1) {
+    top: 18px;
+  }
+
+  .burger span:nth-child(2) {
+    top: 25px;
+  }
+
+  .burger.open span:nth-child(1) {
+    transform: translateY(3.5px) rotate(45deg);
+  }
+
+  .burger.open span:nth-child(2) {
+    transform: translateY(-3.5px) rotate(-45deg);
+  }
+
+  @media (max-width: 760px) {
+    .burger {
+      display: block;
+    }
+
+    .nav {
+      position: fixed;
+      inset: var(--header-h) 0 auto 0;
+      background: rgba(8, 9, 12, 0.97);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition:
+        opacity 0.25s var(--ease),
+        transform 0.25s var(--ease),
+        visibility 0.25s;
+    }
+
+    .nav.open {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+
+    .nav ul {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 8px var(--gutter) 24px;
+    }
+
+    .nav a {
+      padding: 16px 0;
+      font-size: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav li:last-child a {
+      border-bottom: none;
+    }
+  }
+</style>
+
+<script>
+  const bar = document.getElementById('site-header');
+  const burger = document.getElementById('burger');
+  const nav = document.getElementById('nav');
+
+  if (bar) {
+    const onScroll = () => bar.classList.toggle('stuck', window.scrollY > 24);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
+  if (burger && nav) {
+    const close = () => {
+      nav.classList.remove('open');
+      burger.classList.remove('open');
+      burger.setAttribute('aria-expanded', 'false');
+      burger.setAttribute('aria-label', 'メニューを開く');
+    };
+
+    burger.addEventListener('click', () => {
+      const open = !nav.classList.contains('open');
+      nav.classList.toggle('open', open);
+      burger.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', String(open));
+      burger.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
+    });
+
+    nav.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) close();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+  }
+</script>

@@ -1,0 +1,398 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ShaderHero from '../components/ShaderHero.astro';
+import WorkRow from '../components/WorkRow.astro';
+import { SITE, ABOUT, FACTS } from '../data/site';
+import { SKILLS } from '../data/skills';
+
+const works = (await getCollection('works', ({ data }) => import.meta.env.DEV || !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order || b.data.year.localeCompare(a.data.year)
+);
+
+// 絞り込みボタンは実際に使われている技術から組み立てる
+const techs = [...new Set(works.flatMap((w) => w.data.tech))].sort((a, b) => a.localeCompare(b, 'ja'));
+
+const MAX_LEVEL = 5;
+---
+
+<Base>
+  <ShaderHero eyebrow="Portfolio" name={SITE.name} role={SITE.role} lead={SITE.lead} />
+
+  <!-- ============ About ============ -->
+  <section class="section" id="about">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <h2 class="display">About</h2>
+        <span class="num">01 — 自己紹介</span>
+      </div>
+
+      <div class="about">
+        <div class="about-text" data-reveal>
+          {ABOUT.map((p) => <p>{p}</p>)}
+        </div>
+
+        <dl class="facts" data-reveal>
+          {
+            FACTS.map((fact) => (
+              <div class="fact">
+                <dt>{fact.label}</dt>
+                <dd>
+                  {fact.href ? (
+                    <a href={fact.href} target="_blank" rel="noopener">
+                      {fact.value}
+                    </a>
+                  ) : (
+                    fact.value
+                  )}
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Works ============ -->
+  <section class="section works-section" id="works">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <h2 class="display">Works</h2>
+        <span class="num">02 — 制作した作品</span>
+      </div>
+
+      <div class="filter" id="filter" role="group" aria-label="使用技術で絞り込み" data-reveal>
+        <button type="button" class="chip on" data-value="*" aria-pressed="true">All</button>
+        {
+          techs.map((t) => (
+            <button type="button" class="chip" data-value={t} aria-pressed="false">
+              {t}
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="rows" id="rows">
+        {
+          works.map((work, i) => (
+            <WorkRow
+              slug={work.id}
+              index={i}
+              title={work.data.title}
+              year={work.data.year}
+              category={work.data.category}
+              role={work.data.role}
+              tech={work.data.tech}
+              summary={work.data.summary}
+              cover={work.data.cover}
+            />
+          ))
+        }
+      </div>
+
+      <p class="empty" id="empty" hidden>該当する作品がありません。</p>
+    </div>
+  </section>
+
+  <!-- ============ Skills ============ -->
+  <section class="section" id="skills">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <h2 class="display">Skills</h2>
+        <span class="num">03 — 使用技術</span>
+      </div>
+
+      <div class="skills">
+        {
+          SKILLS.map((group) => (
+            <div class="skill-group" data-reveal>
+              <h3 class="skill-cat mono-label">{group.category}</h3>
+              <ul>
+                {group.items.map((item) => (
+                  <li class="skill">
+                    <div class="skill-head">
+                      <span class="skill-name">{item.name}</span>
+                      {item.note && <span class="skill-note">{item.note}</span>}
+                      <span class="skill-lv">
+                        {item.level}/{MAX_LEVEL}
+                      </span>
+                    </div>
+                    <div
+                      class="meter"
+                      role="img"
+                      aria-label={`${item.name} の習熟度 ${item.level} / ${MAX_LEVEL}`}
+                    >
+                      <span style={`width:${(item.level / MAX_LEVEL) * 100}%`} />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Contact ============ -->
+  <section class="section contact-section" id="contact">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <h2 class="display">Contact</h2>
+        <span class="num">04 — ご連絡</span>
+      </div>
+
+      <div class="contact" data-reveal>
+        <p class="contact-lead">
+          作品や技術についてのご質問は、GitHub からご連絡ください。
+        </p>
+        <a class="contact-card" href={SITE.github} target="_blank" rel="noopener">
+          <span class="mono-label">GitHub</span>
+          <span class="contact-value display">{SITE.githubHandle}</span>
+          <span class="contact-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ---------- About ---------- */
+  .about {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: clamp(32px, 6vw, 80px);
+    align-items: start;
+  }
+
+  .about-text {
+    color: var(--text-dim);
+    font-size: clamp(1rem, 1.6vw, 1.15rem);
+    line-height: 2;
+  }
+
+  .about-text p + p {
+    margin-top: 1.4em;
+  }
+
+  .facts {
+    border-top: 1px solid var(--line);
+  }
+
+  .fact {
+    display: grid;
+    grid-template-columns: 7em 1fr;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .fact dt {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding-top: 0.45em;
+  }
+
+  .fact dd {
+    font-size: 0.95rem;
+  }
+
+  .fact a {
+    color: var(--accent-hi);
+    border-bottom: 1px solid var(--accent-line);
+    transition: color 0.25s var(--ease);
+  }
+
+  .fact a:hover {
+    color: var(--accent);
+  }
+
+  /* ---------- Works ---------- */
+  .works-section {
+    background: var(--bg-raise);
+  }
+
+  .filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .chip {
+    padding: 8px 18px;
+    border: 1px solid var(--line-hi);
+    border-radius: 999px;
+    background: transparent;
+    font-family: var(--f-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition:
+      color 0.25s var(--ease),
+      border-color 0.25s var(--ease),
+      background-color 0.25s var(--ease);
+  }
+
+  .chip:hover {
+    color: var(--text);
+    border-color: var(--accent-line);
+  }
+
+  .chip.on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 500;
+  }
+
+  .rows {
+    margin-top: 28px;
+  }
+
+  .empty {
+    padding: 64px 0;
+    text-align: center;
+    color: var(--text-dim);
+  }
+
+  /* ---------- Skills ---------- */
+  .skills {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: clamp(28px, 4vw, 56px);
+  }
+
+  .skill-cat {
+    padding-bottom: 14px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .skill + .skill {
+    margin-top: 22px;
+  }
+
+  .skill-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 9px;
+  }
+
+  .skill-name {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .skill-note {
+    font-size: 0.74rem;
+    color: var(--text-faint);
+  }
+
+  .skill-lv {
+    margin-left: auto;
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    color: var(--text-faint);
+  }
+
+  .meter {
+    height: 2px;
+    background: var(--line-hi);
+    overflow: hidden;
+  }
+
+  .meter span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-warm));
+  }
+
+  /* ---------- Contact ---------- */
+  .contact-section {
+    background: var(--bg-raise);
+  }
+
+  .contact-lead {
+    color: var(--text-dim);
+    margin-bottom: 32px;
+  }
+
+  .contact-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    max-width: 620px;
+    padding: 28px 32px;
+    border: 1px solid var(--line-hi);
+    border-radius: var(--radius);
+    background: var(--surface);
+    transition:
+      border-color 0.3s var(--ease),
+      background-color 0.3s var(--ease),
+      transform 0.3s var(--ease);
+  }
+
+  .contact-card:hover {
+    border-color: var(--accent);
+    background: var(--surface-hi);
+    transform: translateX(6px);
+  }
+
+  .contact-value {
+    font-size: clamp(1.3rem, 3vw, 2rem);
+  }
+
+  .contact-arrow {
+    margin-left: auto;
+    font-size: 1.4rem;
+    color: var(--accent);
+    transition: transform 0.3s var(--ease);
+  }
+
+  .contact-card:hover .contact-arrow {
+    transform: translateX(6px);
+  }
+
+  @media (max-width: 860px) {
+    .about {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // 使用技術での絞り込み。SSR 済みの行を出し入れするだけ。
+  const filter = document.getElementById('filter');
+  const empty = document.getElementById('empty');
+  const rows = Array.from(document.querySelectorAll<HTMLElement>('#rows [data-tech]'));
+
+  filter?.addEventListener('click', (event) => {
+    const btn = (event.target as HTMLElement).closest<HTMLButtonElement>('.chip');
+    if (!btn) return;
+
+    const value = btn.dataset.value ?? '*';
+
+    filter.querySelectorAll<HTMLButtonElement>('.chip').forEach((chip) => {
+      const on = chip === btn;
+      chip.classList.toggle('on', on);
+      chip.setAttribute('aria-pressed', String(on));
+    });
+
+    let shown = 0;
+    rows.forEach((row) => {
+      const list = (row.dataset.tech ?? '').split('|');
+      const match = value === '*' || list.includes(value);
+      row.hidden = !match;
+      if (match) shown++;
+    });
+
+    if (empty) empty.hidden = shown !== 0;
+  });
+</script>

@@ -1,65 +1,117 @@
 # ポートフォリオサイト
 
-ポートフォリオサイトのソースです。ビルド不要の静的サイト（HTML / CSS / JavaScript のみ）。
-
-**現在このリポジトリは private です。** まだ Web サイトとしては公開されていません。
-文章を埋め終わったら「公開する」の手順で public に切り替えると、`https://nerunell11.github.io/` で見られるようになります。
+`https://nerunell11.github.io/` のソースです。Astro で作った静的サイトで、`main` に push すると GitHub Actions がビルドして自動で公開します。
 
 ## ファイル構成
 
 ```
-.
-├─ index.html            ページ本体（文章はここを編集）
-├─ css/style.css         スタイル（配色は先頭の :root で調整）
-├─ js/works-data.js      作品データ ← 作品を増やすときはここ
-├─ js/skills-data.js     スキルデータ ← 技術を増やすときはここ
-├─ js/main.js            描画・絞り込み・スクロール演出（通常さわらない）
-├─ assets/images/        作品のスクリーンショット置き場
-├─ assets/favicon.svg    ファビコン
-└─ .nojekyll             GitHub Pages の Jekyll 処理を無効化
+src/
+├─ content/works/        作品 ← 1ファイル = 1作品。増やすのはここ
+├─ data/
+│  ├─ site.ts            名前・肩書き・About本文・GitHubリンク
+│  └─ skills.ts          スキル一覧
+├─ pages/
+│  ├─ index.astro        トップ（Hero / About / Works / Skills / Contact）
+│  └─ works/[...slug].astro  作品詳細ページ（自動生成）
+├─ components/
+│  ├─ ShaderHero.astro   トップのWebGLシェーダー背景
+│  ├─ WorkRow.astro      作品一覧の1行
+│  ├─ Header.astro / Footer.astro
+├─ layouts/Base.astro    共通のhead・ヘッダー・フッター
+├─ styles/global.css     配色・フォント・共通スタイル
+└─ content.config.ts     作品frontmatterの定義（必須項目のチェック）
+
+public/                  そのまま配信されるファイル
+└─ images/works/         作品のスクリーンショット置き場
 ```
 
-## ローカルで確認する
+## ローカルで動かす
 
-`index.html` をブラウザにドラッグ＆ドロップするか、ダブルクリックするだけで確認できます。ビルドもサーバーも不要です。
+```bash
+npm install
+```
+
+```bash
+npm run dev
+```
+
+`http://localhost:4321` が開きます。ファイルを保存すると自動で反映されます。
+
+公開されるものと同じ状態を確認したいときは `npm run build` のあと `npm run preview`。
 
 ## 作品を追加する
 
-1. スクリーンショットを `assets/images/` に置く（例: `assets/images/mygame.png`）
-2. `js/works-data.js` の `WORKS` 配列に1件追加する
+`src/content/works/` に Markdown を1つ置けば、**一覧カードと詳細ページの両方が自動で生成されます。** ファイル名がそのまま URL になります（`nexus.md` → `/works/nexus/`）。
 
-```js
-{
-  id: "mygame",
-  title: "My Game",
-  year: "2026",
-  category: "個人制作",
-  role: "プログラム全般",
-  tech: ["C++", "DirectX"],       // ここに書いた技術が絞り込みボタンに出る
-  summary: "1〜2行の概要",
-  description: "こだわった点や技術的な工夫",
-  image: "assets/images/mygame.png",   // 画像が無ければ "" でOK（自動でプレースホルダ）
-  links: [
-    { label: "GitHub", url: "https://github.com/Nerunell11/mygame" }
-  ]
-}
+```markdown
+---
+title: My Game
+year: "2026"
+category: 個人制作
+role: プログラム全般
+tech: ["C++", "DirectX"]      # ここに書いた技術が絞り込みボタンに出る
+summary: 一覧に出る1〜2行の概要。
+cover: /images/works/mygame.png   # 無ければこの行ごと消す（自動でプレースホルダ）
+order: 15                      # 小さいほど上に出る
+links:
+  - label: GitHub
+    url: https://github.com/Nerunell11/mygame
+---
+
+## 概要
+
+ここから下は普通の Markdown です。見出し、リスト、コードブロック、画像、表が使えます。
+
+## 技術的に取り組んだこと
+
+実装の判断や工夫をしっかり書ける場所です。
 ```
 
-3. 保存してブラウザを再読み込みすると、カードが増えます
+書きかけを公開したくないときは frontmatter に `draft: true` を足します。`npm run dev` では見えますが、本番ビルドからは除外されます。
+
+必須項目が抜けているとビルド時にエラーで教えてくれます（定義は `src/content.config.ts`）。
 
 > **注意**: 非公開（private）リポジトリの URL を `links` に入れても、他の人からは 404 に見えます。公開しているものだけ載せてください。
 
-## スキルを編集する
+## 画像を追加する
 
-`js/skills-data.js` の `SKILLS` を編集します。`level` は 1〜5 で、そのままバーの長さになります。
+`public/images/works/` に置いて、Markdown からは `/images/works/ファイル名` で参照します。本文中なら `![説明](/images/works/shot1.png)` でそのまま貼れます。
+
+## 文章・スキルを編集する
+
+| 直したいもの | 場所 |
+| --- | --- |
+| 名前・肩書き・ヒーローの文章 | `src/data/site.ts` の `SITE` |
+| About の本文 | `src/data/site.ts` の `ABOUT` |
+| About 右側の項目（所属など） | `src/data/site.ts` の `FACTS` |
+| スキル一覧 | `src/data/skills.ts` |
+
+## 配色・フォントを変える
+
+`src/styles/global.css` の先頭にある `:root` を書き換えると全ページに反映されます。
+
+| 変数 | 用途 |
+| --- | --- |
+| `--bg` / `--bg-raise` | 背景色（セクションごとに交互） |
+| `--accent` | アクセント色。ここを変えると全体の印象が変わる |
+| `--text` / `--text-dim` | 本文 / 補足テキスト |
+| `--f-display` / `--f-mono` | 見出し / 等幅フォント |
+
+トップの背景はシェーダーで描いています。色や流れを変えたいときは `src/components/ShaderHero.astro` の `FRAG` を直接いじってください。WebGL が使えない環境では、その下の CSS グラデーションが見えます。
+
+## SNS用のサムネイル
+
+`public/og.png`（1200x630 推奨）を置いて、`src/layouts/Base.astro` の `OG_IMAGE_EXISTS` を `true` にすると、リンクを貼ったときにサムネイルが出るようになります。
 
 ## 別のPCで編集する
 
 ```bash
 git clone https://github.com/Nerunell11/Nerunell11.github.io.git
+cd Nerunell11.github.io
+npm install
 ```
 
-編集したら、いつも通り push します。
+## 公開する
 
 ```bash
 git add -A
@@ -67,27 +119,4 @@ git commit -m "作品を追加"
 git push
 ```
 
-## 公開する（初回だけ）
-
-文章とスクリーンショットが揃ったら、private から public に切り替えて GitHub Pages を有効化します。
-
-```bash
-gh repo edit Nerunell11/Nerunell11.github.io --visibility public --accept-visibility-change-consequences
-```
-
-```bash
-gh api -X POST repos/Nerunell11/Nerunell11.github.io/pages -f "source[branch]=main" -f "source[path]=/"
-```
-
-数分で `https://nerunell11.github.io/` が見られるようになります。以降は push するだけで1分ほどで反映されます。反映状況はリポジトリページの Actions / Settings → Pages から確認できます。
-
-## 配色を変えたいとき
-
-`css/style.css` の先頭にある `:root` の変数を書き換えると、サイト全体の色がまとめて変わります。
-
-| 変数 | 用途 |
-| --- | --- |
-| `--bg` / `--bg-alt` | 背景色（セクションごとに交互） |
-| `--surface` | カードの背景色 |
-| `--text` / `--text-muted` | 本文 / 補足テキスト |
-| `--accent` | アクセントカラー（ボタン・リンク・バー） |
+push すると GitHub Actions がビルドしてデプロイします。進行状況はリポジトリの Actions タブで見られます。1〜2分で反映されます。
