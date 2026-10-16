@@ -10,7 +10,27 @@ export const SITE = {
   lead: 'C++ を中心に、ゲームを動かす土台そのものをつくることに取り組んでいます。描画・アセット周りの仕組みを自分の手で組み立てながら、扱いやすく速い基盤を目指しています。',
   github: 'https://github.com/Nerunell11',
   githubHandle: '@Nerunell11',
+  email: 'minoruiwashita28@gmail.com',
 } as const;
+
+/**
+ * Contact セクションに並べるリンク。
+ * 増やすときはここに足せば、カードが1枚増えます。
+ */
+export const CONTACTS: { label: string; value: string; href: string; external: boolean }[] = [
+  {
+    label: 'Email',
+    value: SITE.email,
+    href: `mailto:${SITE.email}`,
+    external: false,
+  },
+  {
+    label: 'GitHub',
+    value: SITE.githubHandle,
+    href: SITE.github,
+    external: true,
+  },
+];
 
 /** About セクションの本文。段落ごとに配列の要素にしてください。 */
 export const ABOUT: string[] = [
