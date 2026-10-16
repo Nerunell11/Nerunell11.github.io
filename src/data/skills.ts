@@ -22,8 +22,8 @@ export const SKILLS: SkillGroup[] = [
   {
     category: '言語',
     items: [
-      { name: 'C++', level: 4, note: 'メイン言語' },
-      { name: 'C#', level: 3 },
+      { name: 'C++', level: 5, note: 'メイン言語' },
+      { name: 'C#', level: 4 },
       { name: 'HLSL', level: 3, note: 'シェーダー' },
       { name: 'Python', level: 3, note: '自動化・ツール' },
     ],
@@ -31,11 +31,13 @@ export const SKILLS: SkillGroup[] = [
   {
     category: '開発環境',
     items: [
-      { name: 'Visual Studio', level: 4 },
+      { name: 'Visual Studio', level: 5 },
       { name: 'Git / GitHub', level: 4 },
-      { name: 'DirectX', level: 3 },
-      { name: 'Unity', level: 2 },
-      { name: 'CMake', level: 2 },
+      { name: 'DirectX', level: 4 },
+      { name: 'Unity', level: 4 },
+      { name: 'CMake', level: 4 },
+      { name: 'Vulkan', level: 3 },
+      { name: 'Rider', level: 3 },
     ],
   },
 ];
