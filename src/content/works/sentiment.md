@@ -3,7 +3,7 @@ title: Sentiment
 period: 2025.10 - 2026.03（5ヶ月）
 category: チーム制作
 role: メインプログラマー
-tech: ["C++", "DirectX"]
+tech: ["C++", "DirectX 11"]
 summary: 初めてのチーム制作で作ったタワーディフェンスゲーム。大量の敵を同時に出しても高いパフォーマンスを保てるように設計しました。
 order: 40
 links: []
