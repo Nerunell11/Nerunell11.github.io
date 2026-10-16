@@ -8,15 +8,16 @@ interface Props {
   slug: string;
   index: number;
   title: string;
-  year: string;
+  period: string;
   category: string;
-  role: string;
+  /** 個人開発など、担当を書く必要がない作品では渡されない */
+  role?: string;
   tech: string[];
   summary: string;
   cover?: string;
 }
 
-const { slug, index, title, year, category, role, tech, summary, cover } = Astro.props;
+const { slug, index, title, period, category, role, tech, summary, cover } = Astro.props;
 const num = String(index + 1).padStart(2, '0');
 ---
 
@@ -37,14 +38,14 @@ const num = String(index + 1).padStart(2, '0');
 
     <div class="body">
       <p class="meta">
-        <span>{year}</span>
+        <span>{period}</span>
         <span class="dot" aria-hidden="true"></span>
         <span>{category}</span>
       </p>
 
       <h3 class="title display">{title}</h3>
 
-      <p class="role"><span>担当</span>{role}</p>
+      {role && <p class="role"><span>担当</span>{role}</p>}
       <p class="summary">{summary}</p>
 
       <ul class="tags">

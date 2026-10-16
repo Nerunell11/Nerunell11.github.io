@@ -46,9 +46,9 @@ npm run dev
 ```markdown
 ---
 title: My Game
-year: "2026"
-category: 個人制作
-role: プログラム全般
+period: 2026.04 - 2026.08     # 制作期間
+category: 個人開発
+role: メインプログラマー        # 個人開発など、書く必要がなければこの行ごと消す
 tech: ["C++", "DirectX"]      # ここに書いた技術が絞り込みボタンに出る
 summary: 一覧に出る1〜2行の概要。
 cover: /images/works/mygame.png   # 無ければこの行ごと消す（自動でプレースホルダ）

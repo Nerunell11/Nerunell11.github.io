@@ -5,7 +5,7 @@ import Base from '../../layouts/Base.astro';
 export async function getStaticPaths() {
   const works = (
     await getCollection('works', ({ data }) => import.meta.env.DEV || !data.draft)
-  ).sort((a, b) => a.data.order - b.data.order || b.data.year.localeCompare(a.data.year));
+  ).sort((a, b) => a.data.order - b.data.order);
 
   return works.map((work, i) => ({
     params: { slug: work.id },
@@ -35,7 +35,7 @@ const d = work.data;
       <a class="back mono-label" href="/#works">← Works</a>
 
       <p class="meta">
-        <span>{d.year}</span>
+        <span>{d.period}</span>
         <span class="dot" aria-hidden="true"></span>
         <span>{d.category}</span>
       </p>
@@ -60,9 +60,18 @@ const d = work.data;
 
       <aside class="side">
         <section class="block">
-          <h2 class="mono-label">担当</h2>
-          <p>{d.role}</p>
+          <h2 class="mono-label">制作期間</h2>
+          <p>{d.period}</p>
         </section>
+
+        {
+          d.role && (
+            <section class="block">
+              <h2 class="mono-label">担当</h2>
+              <p>{d.role}</p>
+            </section>
+          )
+        }
 
         <section class="block">
           <h2 class="mono-label">使用技術</h2>

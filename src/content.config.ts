@@ -15,12 +15,12 @@ const works = defineCollection({
   schema: z.object({
     /** 作品名 */
     title: z.string(),
-    /** 制作年。"2026" や "2026.04" など自由 */
-    year: z.string(),
-    /** 一覧カードの小さいラベル（個人制作 / チーム制作 / ツール など） */
+    /** 制作期間。"2026.04 - 2026.08" や "2026.04 - 制作中" など自由 */
+    period: z.string(),
+    /** 一覧カードの小さいラベル（個人開発 / チーム制作 など） */
     category: z.string(),
-    /** 自分の担当範囲 */
-    role: z.string(),
+    /** 自分の担当範囲。個人開発など、書く必要がない作品では省略する */
+    role: z.string().optional(),
     /** 使用技術。ここから絞り込みタグが自動生成される */
     tech: z.array(z.string()).min(1),
     /** 一覧に出る1〜2行の概要 */
@@ -31,7 +31,7 @@ const works = defineCollection({
     links: z
       .array(z.object({ label: z.string(), url: z.string().url() }))
       .default([]),
-    /** 一覧での並び順。小さいほど上。同値なら year の降順 */
+    /** 一覧での並び順。小さいほど上 */
     order: z.number().default(100),
     /** トップで大きく扱う代表作かどうか */
     featured: z.boolean().default(false),

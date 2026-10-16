@@ -1,8 +1,7 @@
 ---
 title: Nexus
-year: "2026"
-category: 【個人制作 / チーム制作】
-role: 【担当範囲を記入】
+period: 【制作期間：例）2026.04 - 2026.08】
+category: 個人開発
 tech: ["C++"]
 summary: 【一覧に出る1〜2行の概要。何をするものかを端的に。】
 order: 10

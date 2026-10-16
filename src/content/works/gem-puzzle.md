@@ -1,8 +1,7 @@
 ---
 title: GemPuzzle
-year: "2025"
-category: 個人制作
-role: 【担当範囲を記入】
+period: 【制作期間：例）2026.04 - 2026.08】
+category: 個人開発
 tech: ["C++", "DirectX"]
 summary: 【一覧に出る1〜2行の概要。】
 order: 50

@@ -7,7 +7,7 @@ import { SITE, ABOUT, FACTS, CONTACTS } from '../data/site';
 import { SKILLS } from '../data/skills';
 
 const works = (await getCollection('works', ({ data }) => import.meta.env.DEV || !data.draft)).sort(
-  (a, b) => a.data.order - b.data.order || b.data.year.localeCompare(a.data.year)
+  (a, b) => a.data.order - b.data.order
 );
 
 // 絞り込みボタンは実際に使われている技術から組み立てる
@@ -80,7 +80,7 @@ const MAX_LEVEL = 5;
               slug={work.id}
               index={i}
               title={work.data.title}
-              year={work.data.year}
+              period={work.data.period}
               category={work.data.category}
               role={work.data.role}
               tech={work.data.tech}
