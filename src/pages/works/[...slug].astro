@@ -316,8 +316,10 @@ const d = work.data;
     font-weight: 700;
   }
 
+  /* 小さい画像を引き伸ばさない。コードのスクリーンショットがぼやけるため。 */
   .prose :global(img) {
-    width: 100%;
+    max-width: 100%;
+    height: auto;
     margin: 2em 0;
     border: 1px solid var(--line);
     border-radius: var(--radius);
