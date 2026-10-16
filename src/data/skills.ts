@@ -1,8 +1,11 @@
 /**
  * スキル一覧。
+ *
  * level は 1〜5。そのままバーの長さになります。
  *   1 触ったことがある / 2 基本的な実装ができる / 3 一通り実装できる
  *   4 制作で問題なく使える / 5 得意分野として説明できる
+ *
+ * ※ 現在の level は暫定値です。実感と違うものは書き換えてください。
  */
 export interface Skill {
   name: string;
@@ -21,26 +24,18 @@ export const SKILLS: SkillGroup[] = [
     items: [
       { name: 'C++', level: 4, note: 'メイン言語' },
       { name: 'C#', level: 3 },
-      { name: 'Python', level: 3, note: '自動化・ツール' },
-      { name: 'TypeScript', level: 2 },
-    ],
-  },
-  {
-    category: 'グラフィックス / エンジン',
-    items: [
-      { name: 'DirectX', level: 3 },
       { name: 'HLSL', level: 3, note: 'シェーダー' },
-      { name: 'Unity', level: 2 },
-      { name: 'WebGL / GLSL', level: 2 },
+      { name: 'Python', level: 3, note: '自動化・ツール' },
     ],
   },
   {
-    category: 'ツール / 環境',
+    category: '開発環境',
     items: [
-      { name: 'Git / GitHub', level: 4 },
       { name: 'Visual Studio', level: 4 },
+      { name: 'Git / GitHub', level: 4 },
+      { name: 'DirectX', level: 3 },
+      { name: 'Unity', level: 2 },
       { name: 'CMake', level: 2 },
-      { name: 'Playwright', level: 2, note: 'E2Eテスト' },
     ],
   },
 ];
