@@ -1,6 +1,6 @@
 ---
 title: Nexus
-period: 2026.07 - 現在
+period: 2026.07 - 開発中
 category: 個人開発
 tech: ["C++"]
 summary: 【一覧に出る1〜2行の概要。何をするものかを端的に。】
