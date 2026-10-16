@@ -15,9 +15,12 @@ interface Props {
   tech: string[];
   summary: string;
   cover?: string;
+  /** 継続中の作品。「開発中」バッジを出す */
+  ongoing?: boolean;
 }
 
-const { slug, index, title, period, category, role, tech, summary, cover } = Astro.props;
+const { slug, index, title, period, category, role, tech, summary, cover, ongoing } =
+  Astro.props;
 const num = String(index + 1).padStart(2, '0');
 ---
 
@@ -41,6 +44,12 @@ const num = String(index + 1).padStart(2, '0');
         <span>{period}</span>
         <span class="dot" aria-hidden="true"></span>
         <span>{category}</span>
+        {ongoing && (
+          <span class="live">
+            <span class="live-dot" aria-hidden="true" />
+            開発中
+          </span>
+        )}
       </p>
 
       <h3 class="title display">{title}</h3>
@@ -160,6 +169,49 @@ const num = String(index + 1).padStart(2, '0');
     height: 3px;
     border-radius: 50%;
     background: var(--accent);
+  }
+
+  /* 継続中であることを示すバッジ。点が静かに明滅する。 */
+  .live {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 11px 3px 9px;
+    border: 1px solid var(--accent-line);
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-hi);
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: none;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 rgba(255, 107, 44, 0.7);
+    animation: pulse 2s ease-out infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 107, 44, 0.65);
+    }
+    70% {
+      box-shadow: 0 0 0 7px rgba(255, 107, 44, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 107, 44, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .live-dot {
+      animation: none;
+    }
   }
 
   .title {

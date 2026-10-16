@@ -35,6 +35,8 @@ const works = defineCollection({
     order: z.number().default(100),
     /** トップで大きく扱う代表作かどうか */
     featured: z.boolean().default(false),
+    /** 現在も開発を続けている作品。true にすると「開発中」バッジが出る */
+    ongoing: z.boolean().default(false),
     /** 下書き。true の間は本番ビルドに出力されない */
     draft: z.boolean().default(false),
   }),

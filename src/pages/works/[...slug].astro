@@ -38,6 +38,14 @@ const d = work.data;
         <span>{d.period}</span>
         <span class="dot" aria-hidden="true"></span>
         <span>{d.category}</span>
+        {
+          d.ongoing && (
+            <span class="live">
+              <span class="live-dot" aria-hidden="true" />
+              開発中
+            </span>
+          )
+        }
       </p>
 
       <h1 class="display title">{d.title}</h1>
@@ -166,6 +174,47 @@ const d = work.data;
     height: 3px;
     border-radius: 50%;
     background: var(--accent);
+  }
+
+  .live {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 11px 3px 9px;
+    border: 1px solid var(--accent-line);
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-hi);
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: none;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease-out infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 107, 44, 0.65);
+    }
+    70% {
+      box-shadow: 0 0 0 7px rgba(255, 107, 44, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 107, 44, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .live-dot {
+      animation: none;
+    }
   }
 
   .title {
