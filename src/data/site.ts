@@ -22,6 +22,7 @@ export const ABOUT: string[] = [
 export const FACTS: { label: string; value: string; href?: string }[] = [
   { label: '所属', value: '【学校名・学科 / 所属】' },
   { label: '専門', value: 'ゲームエンジン / グラフィックス' },
-  { label: '主な言語', value: 'C++ / C# / Python / TypeScript' },
+  // Skills セクションの「言語」と揃えてください（片方だけ直すと食い違います）
+  { label: '主な言語', value: 'C++ / C# / HLSL / Python' },
   { label: 'GitHub', value: SITE.githubHandle, href: SITE.github },
 ];
