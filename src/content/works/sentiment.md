@@ -1,6 +1,6 @@
 ---
 title: Sentiment
-period: 【制作期間：例）2026.04 - 2026.08】
+period: 5ヶ月
 category: チーム制作
 role: メインプログラマー
 tech: ["C++", "DirectX"]

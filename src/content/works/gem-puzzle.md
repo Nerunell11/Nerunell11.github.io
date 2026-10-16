@@ -1,6 +1,6 @@
 ---
 title: GemPuzzle
-period: 【制作期間：例）2026.04 - 2026.08】
+period: 2週間
 category: 個人開発
 tech: ["C++", "DirectX"]
 summary: 【一覧に出る1〜2行の概要。】

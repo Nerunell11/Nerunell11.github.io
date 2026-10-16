@@ -1,6 +1,6 @@
 ---
 title: AssetConverter
-period: 【制作期間：例）2026.04 - 2026.08】
+period: 2026.07 - 現在
 category: 個人開発
 tech: ["C++"]
 summary: テクスチャ・メッシュ・音声・pakアーカイブを対象にした、ゲームアセットの最適化と変換を行う Windows 向け GUI ツール。
