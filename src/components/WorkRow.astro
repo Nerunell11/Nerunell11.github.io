@@ -140,8 +140,21 @@ const num = String(index + 1).padStart(2, '0');
     pointer-events: none;
   }
 
+  /* 連番の下だけ暗く沈めて、明るいスクリーンショットでも数字が読めるようにする */
+  .visual::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 42%;
+    background: linear-gradient(to top, rgba(5, 6, 9, 0.75), transparent);
+    pointer-events: none;
+  }
+
   .num {
     position: absolute;
+    z-index: 1;
     left: 14px;
     bottom: 8px;
     font-family: var(--f-mono);
@@ -149,8 +162,6 @@ const num = String(index + 1).padStart(2, '0');
     font-weight: 500;
     line-height: 1;
     color: var(--accent);
-    opacity: 0.85;
-    mix-blend-mode: screen;
   }
 
   .meta {
