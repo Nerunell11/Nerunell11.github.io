@@ -358,8 +358,11 @@ const d = work.data;
     font-size: 0.84rem;
   }
 
+  /* 狭い画面では表だけを横スクロールさせる（ページ全体をはみ出させない） */
   .prose :global(table) {
+    display: block;
     width: 100%;
+    overflow-x: auto;
     margin: 1.8em 0;
     border-collapse: collapse;
     font-size: 0.9rem;
@@ -466,8 +469,9 @@ const d = work.data;
   }
 
   @media (max-width: 900px) {
+    /* minmax(0, 1fr) にしないと、表のような広い中身に列が引き伸ばされる */
     .grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .side {
