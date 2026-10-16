@@ -26,7 +26,7 @@ const num = String(index + 1).padStart(2, '0');
 
 <article class="row" data-tech={tech.join('|')} data-reveal>
   <a class="row-link" href={`/works/${slug}/`} aria-label={`${title} の詳細を見る`}>
-    <div class="visual">
+    <div class:list={['visual', !cover && 'is-placeholder']}>
       {
         cover ? (
           <img src={cover} alt={`${title} のスクリーンショット`} loading="lazy" decoding="async" />
@@ -96,9 +96,10 @@ const num = String(index + 1).padStart(2, '0');
     order: 2;
   }
 
+  /* ゲーム画面の多くが 16:9 なので、それに合わせて上下を切らないようにする */
   .visual {
     position: relative;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 9;
     overflow: hidden;
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -114,12 +115,13 @@ const num = String(index + 1).padStart(2, '0');
     transition:
       transform 0.7s var(--ease),
       filter 0.5s var(--ease);
-    filter: grayscale(0.35) contrast(1.05);
+    /* タイトル画面は暗いものが多いので、わずかに持ち上げて潰れを防ぐ */
+    filter: brightness(1.08);
   }
 
   .row-link:hover .visual img {
     transform: scale(1.04);
-    filter: none;
+    filter: brightness(1.18);
   }
 
   /* 画像が無いときの代替。文字だけで寂しくならないよう熱源を置く。 */
@@ -130,7 +132,7 @@ const num = String(index + 1).padStart(2, '0');
     color: rgba(244, 242, 239, 0.14);
   }
 
-  .visual::before {
+  .visual.is-placeholder::before {
     content: "";
     position: absolute;
     inset: 0;
