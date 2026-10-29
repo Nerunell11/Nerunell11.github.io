@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import ShaderHero from '../components/ShaderHero.astro';
 import WorkRow from '../components/WorkRow.astro';
-import { SITE, ABOUT, FACTS, CONTACTS } from '../data/site';
+import { SITE, ABOUT, ABOUT_PHOTO, FACTS, CONTACTS } from '../data/site';
 import { SKILLS } from '../data/skills';
 
 const works = (await getCollection('works', ({ data }) => import.meta.env.DEV || !data.draft)).sort(
@@ -30,6 +30,20 @@ const MAX_LEVEL = 5;
       <div class="about">
         <div class="about-text" data-reveal>
           {ABOUT.map((p) => <p>{p}</p>)}
+
+          {
+            ABOUT_PHOTO && (
+              <img
+                class="about-photo"
+                src={ABOUT_PHOTO.src}
+                alt={ABOUT_PHOTO.alt}
+                loading="lazy"
+                decoding="async"
+                width="1500"
+                height="1000"
+              />
+            )
+          }
         </div>
 
         <dl class="facts" data-reveal>
@@ -189,6 +203,15 @@ const MAX_LEVEL = 5;
 
   .about-text p + p {
     margin-top: 1.4em;
+  }
+
+  /* 本文の補足として置くので、主張しすぎない大きさに留める */
+  .about-photo {
+    width: 100%;
+    height: auto;
+    margin-top: 2.4em;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
   }
 
   .facts {

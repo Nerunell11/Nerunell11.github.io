@@ -39,6 +39,15 @@ export const ABOUT: string[] = [
   '作るときに決めているのは、「気をつける」で解決しないことです。人が注意し続けることを前提にした仕組みは、規模が大きくなれば必ず破綻します。間違いが起きない形にするか、起きたときに必ず気づく形にするか。そのどちらかに落とすところまでを設計だと考えています。',
 ];
 
+/**
+ * About の本文の下に置く写真。
+ * 不要になったら null にすれば、写真ごと消えます。
+ */
+export const ABOUT_PHOTO: { src: string; alt: string } | null = {
+  src: '/images/about-sailing.webp',
+  alt: '強風の中、ヨットで走っているところ',
+};
+
 /** About の右側に並ぶ項目。 */
 export const FACTS: { label: string; value: string; href?: string }[] = [
   { label: '所属', value: 'HAL東京 ゲーム制作コース' },
