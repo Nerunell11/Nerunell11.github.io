@@ -327,6 +327,16 @@ const d = work.data;
     font-weight: 700;
   }
 
+  .prose :global(video) {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 2em 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-sink);
+  }
+
   /* 小さい画像を引き伸ばさない。コードのスクリーンショットがぼやけるため。 */
   .prose :global(img) {
     max-width: 100%;
