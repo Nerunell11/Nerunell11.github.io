@@ -4,7 +4,7 @@ period: 2026.07 - 現在
 category: 個人開発
 tech: ["C++", "WinUI 3", "DirectX"]
 summary: ゲームの2D素材を軽量化・圧縮・変換する Windows 専用の GUI ツール。ドラッグ&ドロップして出力先プリセットを選ぶだけで、まとめて最適化します。
-order: 20
+order: 10
 featured: true
 ongoing: true
 links: []
