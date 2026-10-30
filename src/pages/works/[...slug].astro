@@ -46,8 +46,11 @@ const d = work.data;
             </span>
           )
         }
-        {d.awards.map((a) => <span class="award">{a.label}</span>)}
       </p>
+
+      {d.awards.length > 0 && (
+        <p class="awards">{d.awards.map((a) => <span class="award">{a.label}</span>)}</p>
+      )}
 
       <h1 class="display title">{d.title}</h1>
       <p class="summary">{d.summary}</p>
@@ -526,6 +529,14 @@ const d = work.data;
     display: block;
     font-size: 0.78rem;
     color: var(--text-faint);
+  }
+
+  /* 受賞はメタ行に詰めず、正式名称のまま独立した行に出す */
+  .awards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 14px;
   }
 
   /* 受賞バッジ。開発中バッジ（橙）と区別するため琥珀色にする */

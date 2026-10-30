@@ -10,8 +10,8 @@ summary: |-
 cover: /images/works/sentiment-title.webp
 order: 40
 awards:
-  - label: ビジュアル賞
-    detail: 進級制作展（HAL EVENT WEEK）2年次
+  - label: 進級制作展（HAL EVENT WEEK）ビジュアル賞
+    detail: 2年次
 links: []
 ---
 
