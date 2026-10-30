@@ -4,7 +4,9 @@ period: 2025.10 - 2026.03（5ヶ月）
 category: チーム制作
 role: メインプログラマー
 tech: ["C++", "DirectX 11", "HLSL"]
-summary: 初めてのチーム制作で作ったタワーディフェンスゲーム。大量の敵を同時に出しても高いパフォーマンスを保てるように設計しました。
+summary: |-
+  初めてのチーム制作で作ったタワーディフェンスゲーム。
+  大量の敵を同時に出しても高いパフォーマンスを保てるように設計しました。
 cover: /images/works/sentiment-title.webp
 order: 40
 links: []

@@ -3,7 +3,9 @@ title: GemPuzzle
 period: 2025.09（2週間）
 category: 個人開発
 tech: ["C++", "DirectX 11"]
-summary: 初めて DirectX 11 を使って制作した2Dゲーム。同じ色のジェムを4つつなげて消す、連鎖ありの落ち物パズルです。
+summary: |-
+  初めて DirectX 11 を使って制作した2Dゲーム。
+  同じ色のジェムを4つつなげて消す、連鎖ありの落ち物パズルです。
 cover: /images/works/gem-puzzle-title.webp
 order: 50
 links: []

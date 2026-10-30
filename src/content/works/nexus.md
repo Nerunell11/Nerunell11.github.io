@@ -3,7 +3,9 @@ title: Nexus
 period: 2026.07 - 現在
 category: 個人開発
 tech: ["C++", "DirectX 12", "Vulkan", "HLSL"]
-summary: C++20 でフルスクラッチ開発している 2D/3D ゲームエンジン。並列ECSを中核に据え、DirectX 12 と Vulkan を自作のRHIで抽象化しています。
+summary: |-
+  C++20 でフルスクラッチ開発している 2D/3D ゲームエンジン。
+  並列ECSを中核に据え、DirectX 12 と Vulkan を自作のRHIで抽象化しています。
 cover: /images/works/nexus-pbr.webp
 order: 20
 featured: true
