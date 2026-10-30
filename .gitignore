@@ -16,3 +16,6 @@ Desktop.ini
 # 一時ファイル
 *.log
 *.tmp
+
+# Codex の出力
+out/
