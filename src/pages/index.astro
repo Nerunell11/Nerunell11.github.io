@@ -108,6 +108,7 @@ const ICONS = Object.fromEntries(
               summary={work.data.summary}
               cover={work.data.cover}
               ongoing={work.data.ongoing}
+              awards={work.data.awards}
             />
           ))
         }
@@ -176,7 +177,7 @@ const ICONS = Object.fromEntries(
             <li class="achievement">
               <span class="ach-kind mono-label">{a.kind}</span>
               <div class="ach-body">
-                <p class="ach-title">{a.title}</p>
+                <p class="ach-title">{a.href ? <a href={a.href}>{a.title} <span aria-hidden="true">→</span></a> : a.title}</p>
                 {a.note && <p class="ach-note">{a.note}</p>}
               </div>
               {a.when && <span class="ach-when">{a.when}</span>}
@@ -444,6 +445,14 @@ const ICONS = Object.fromEntries(
   .ach-title {
     font-size: 1.05rem;
     font-weight: 600;
+  }
+
+  .ach-title a {
+    transition: color 0.25s var(--ease);
+  }
+
+  .ach-title a:hover {
+    color: var(--accent);
   }
 
   .ach-note {

@@ -46,6 +46,7 @@ const d = work.data;
             </span>
           )
         }
+        {d.awards.map((a) => <span class="award">{a.label}</span>)}
       </p>
 
       <h1 class="display title">{d.title}</h1>
@@ -77,6 +78,20 @@ const d = work.data;
             <section class="block">
               <h2 class="mono-label">担当</h2>
               <p>{d.role}</p>
+            </section>
+          )
+        }
+
+        {
+          d.awards.length > 0 && (
+            <section class="block">
+              <h2 class="mono-label">受賞</h2>
+              {d.awards.map((a) => (
+                <p>
+                  {a.label}
+                  {a.detail && <span class="award-detail">{a.detail}</span>}
+                </p>
+              ))}
             </section>
           )
         }
@@ -505,5 +520,26 @@ const d = work.data;
     .pager {
       grid-template-columns: 1fr;
     }
+  }
+
+  .award-detail {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-faint);
+  }
+
+  /* 受賞バッジ。開発中バッジ（橙）と区別するため琥珀色にする */
+  .award {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 11px;
+    border: 1px solid rgba(255, 181, 71, 0.38);
+    border-radius: 999px;
+    background: rgba(255, 181, 71, 0.1);
+    color: var(--accent-warm);
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: none;
   }
 </style>

@@ -17,9 +17,10 @@ interface Props {
   cover?: string;
   /** 継続中の作品。「開発中」バッジを出す */
   ongoing?: boolean;
+  awards?: { label: string; detail?: string }[];
 }
 
-const { slug, index, title, period, category, role, tech, summary, cover, ongoing } =
+const { slug, index, title, period, category, role, tech, summary, cover, ongoing, awards = [] } =
   Astro.props;
 const num = String(index + 1).padStart(2, '0');
 ---
@@ -50,6 +51,7 @@ const num = String(index + 1).padStart(2, '0');
             開発中
           </span>
         )}
+        {awards.map((a) => <span class="award">{a.label}</span>)}
       </p>
 
       <h3 class="title display">{title}</h3>
@@ -293,5 +295,20 @@ const num = String(index + 1).padStart(2, '0');
     .row:nth-child(even) .visual {
       order: 0;
     }
+  }
+
+  /* 受賞バッジ。開発中バッジ（橙）と区別するため琥珀色にする */
+  .award {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 11px;
+    border: 1px solid rgba(255, 181, 71, 0.38);
+    border-radius: 999px;
+    background: rgba(255, 181, 71, 0.1);
+    color: var(--accent-warm);
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: none;
   }
 </style>

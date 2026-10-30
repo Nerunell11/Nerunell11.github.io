@@ -37,6 +37,8 @@ const works = defineCollection({
     featured: z.boolean().default(false),
     /** 現在も開発を続けている作品。true にすると「開発中」バッジが出る */
     ongoing: z.boolean().default(false),
+    /** 受賞歴。label は一覧のバッジ、detail は詳細ページに出す */
+    awards: z.array(z.object({ label: z.string(), detail: z.string().optional() })).default([]),
     /** 下書き。true の間は本番ビルドに出力されない */
     draft: z.boolean().default(false),
   }),
