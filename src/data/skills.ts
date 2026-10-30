@@ -11,6 +11,10 @@ export interface Skill {
   name: string;
   level: number;
   note?: string;
+  /** src/icons/skills/ のファイル名（拡張子なし） */
+  icon?: string;
+  /** 公式アイコンが無いものは短い文字で代用する */
+  mono?: string;
 }
 
 export interface SkillGroup {
@@ -22,22 +26,22 @@ export const SKILLS: SkillGroup[] = [
   {
     category: '言語',
     items: [
-      { name: 'C++', level: 5, note: 'メイン言語' },
-      { name: 'C#', level: 4 },
-      { name: 'HLSL', level: 3, note: 'シェーダー' },
-      { name: 'Python', level: 3, note: '自動化・ツール' },
+      { name: 'C++', icon: 'cplusplus', level: 5, note: 'メイン言語' },
+      { name: 'C#', icon: 'csharp', level: 4 },
+      { name: 'HLSL', mono: 'HLSL', level: 3, note: 'シェーダー' },
+      { name: 'Python', icon: 'python', level: 3, note: '自動化・ツール' },
     ],
   },
   {
     category: '開発環境',
     items: [
-      { name: 'Visual Studio', level: 5 },
-      { name: 'Git / GitHub', level: 4 },
-      { name: 'DirectX', level: 4 },
-      { name: 'Unity', level: 4 },
-      { name: 'CMake', level: 4 },
-      { name: 'Vulkan', level: 3 },
-      { name: 'Rider', level: 3 },
+      { name: 'Visual Studio', icon: 'visualstudio', level: 5 },
+      { name: 'Git / GitHub', icon: 'git', level: 4 },
+      { name: 'DirectX', mono: 'DX', level: 4 },
+      { name: 'Unity', icon: 'unity', level: 4 },
+      { name: 'CMake', icon: 'cmake', level: 4 },
+      { name: 'Vulkan', icon: 'vulkan', level: 3 },
+      { name: 'Rider', icon: 'rider', level: 3 },
     ],
   },
 ];
