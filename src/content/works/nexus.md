@@ -35,8 +35,15 @@ ECS のストレージはアーキタイプ方式で並列化に向いた形で�
 
 システムが触るコンポーネントを、型で宣言させることにしました。
 
+NexusDefense で実際に登録しているコードです。
+
 ```cpp
-scheduler.Add<Reads<Position>, Writes<Velocity>>("Integrate", &IntegrateSystem, &state);
+// Samples/TowerDefense/Core/TdSystems.cpp
+scheduler.Add<nx::Reads<TdPosition, TdEnemyStats, TdLagState>,
+              nx::Writes<TdVelocity>>(
+    "TD/EnemyAI", &EnemyAiSystem, &context);
+scheduler.Add<nx::Reads<TdVelocity>, nx::Writes<TdPosition>>(
+    "TD/Movement", &MovementSystem, &context);
 ```
 
 アクセス集合はビットセットで保持し、2つのシステムが衝突するのは次のいずれかの場合です。
@@ -56,6 +63,53 @@ scheduler.Add<Reads<Position>, Writes<Velocity>>("Integrate", &IntegrateSystem, 
 
 エンティティの生成・破棄といった構造変更は、システムごとのコマンドバッファに積み、ウェーブの境界で呼び出しスレッドが登録順に適用します。どのシステムが先に終わったかは、適用順に影響しません。
 
+主要なクラスの関係です。
+
+```mermaid
+classDiagram
+direction TB
+class World
+class Archetype
+class Chunk
+class SystemScheduler
+class SystemContext
+class JobSystem
+class EntityCommandBuffer
+World *-- Archetype : 保持
+Archetype *-- Chunk : 所有
+SystemScheduler --> JobSystem : ジョブを投入
+SystemScheduler --> SystemContext : 実行ごとに生成
+SystemContext --> World : 読み書き
+SystemContext --> JobSystem : チャンクを分配
+SystemContext --> EntityCommandBuffer : 構造変更を積む
+SystemScheduler *-- EntityCommandBuffer : システムごとに1つ
+```
+
+1フレームの実行の流れです。
+
+```mermaid
+sequenceDiagram
+participant F as フレーム
+participant S as SystemScheduler
+participant J as JobSystem
+participant Y as System
+participant W as World
+participant C as EntityCommandBuffer
+F->>S: Run(World, JobSystem)
+S->>S: アクセス集合から<br/>ウェーブを決める
+loop ウェーブを順に
+  S->>J: 同じウェーブの<br/>システムを投入
+  J->>Y: SystemContext を<br/>渡して実行
+  Y->>W: 宣言した<br/>コンポーネントだけ読み書き
+  Y->>C: 構造変更を積む
+  S->>J: 全ジョブの完了を待つ
+  J-->>S: ウェーブ完了
+  S->>C: 登録順に適用
+  C->>W: 生成・破棄・追加・削除
+end
+S-->>F: 全システム完了
+```
+
 ## デュアルRHI — DirectX 12 と Vulkan を同じAPIで
 
 ### 抽象化の粒度を「薄く」に決めた
@@ -63,6 +117,34 @@ scheduler.Add<Reads<Position>, Writes<Velocity>>("Integrate", &IntegrateSystem, 
 DirectX 12 と Vulkan は、コマンドバッファ・明示的同期・ディスクリプタ管理という点で世代が揃っているため、共通の抽象を置けます。
 
 方針として **RHI 自体は賢くしない**ことに決めました。Device / Queue / CommandList / Pipeline / DescriptorSet / Resource / Barrier を両APIとほぼ1対1で表現するに留め、バリアやディスクリプタの自動化は上位のレンダグラフ層に任せます。
+
+抽象インターフェースと、各バックエンドの実装の関係です。
+
+```mermaid
+classDiagram
+direction TB
+class IDevice
+class ICommandList
+class ISwapchain
+class VulkanDevice
+class VulkanCommandList
+class VulkanSwapchain
+class D3D12Device
+class D3D12CommandList
+class D3D12Swapchain
+IDevice <|-- VulkanDevice
+IDevice <|-- D3D12Device
+ICommandList <|-- VulkanCommandList
+ICommandList <|-- D3D12CommandList
+ISwapchain <|-- VulkanSwapchain
+ISwapchain <|-- D3D12Swapchain
+VulkanDevice *-- VulkanCommandList
+VulkanDevice *-- VulkanSwapchain
+D3D12Device *-- D3D12CommandList
+D3D12Device *-- D3D12Swapchain
+IDevice --> ICommandList : フレームごとに提供
+IDevice --> ISwapchain : 生成
+```
 
 厚い抽象（OpenGL 風に隠蔽する形）は、商用レベルの性能要件と矛盾するため採りませんでした。DX11 / OpenGL 世代まで対応する案も、抽象化の最小公倍数が古い世代に引きずられて明示的APIの性能が出ないため却下しています。
 
