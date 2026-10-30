@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import ShaderHero from '../components/ShaderHero.astro';
 import WorkRow from '../components/WorkRow.astro';
-import { SITE, ABOUT, ABOUT_PHOTO, FACTS, CONTACTS } from '../data/site';
+import { SITE, ABOUT, ABOUT_PHOTO, FACTS, CONTACTS, ACHIEVEMENTS } from '../data/site';
 import { SKILLS } from '../data/skills';
 
 const works = (await getCollection('works', ({ data }) => import.meta.env.DEV || !data.draft)).sort(
@@ -162,12 +162,37 @@ const ICONS = Object.fromEntries(
     </div>
   </section>
 
+  <!-- ============ Achievements ============ -->
+  <section class="section achievements-section" id="achievements">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <h2 class="display">Achievements</h2>
+        <span class="num">04 — 資格・実績</span>
+      </div>
+
+      <ul class="achievements" data-reveal>
+        {
+          ACHIEVEMENTS.map((a) => (
+            <li class="achievement">
+              <span class="ach-kind mono-label">{a.kind}</span>
+              <div class="ach-body">
+                <p class="ach-title">{a.title}</p>
+                {a.note && <p class="ach-note">{a.note}</p>}
+              </div>
+              {a.when && <span class="ach-when">{a.when}</span>}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
   <!-- ============ Contact ============ -->
   <section class="section contact-section" id="contact">
     <div class="wrap">
       <div class="section-head" data-reveal>
         <h2 class="display">Contact</h2>
-        <span class="num">04 — ご連絡</span>
+        <span class="num">05 — ご連絡</span>
       </div>
 
       <div class="contact" data-reveal>
@@ -397,8 +422,52 @@ const ICONS = Object.fromEntries(
   }
 
   /* ---------- Contact ---------- */
-  .contact-section {
+  /* ---------- Achievements ---------- */
+  .achievements-section {
     background: var(--bg-raise);
+  }
+
+  .achievements {
+    max-width: 820px;
+    border-top: 1px solid var(--line);
+  }
+
+  .achievement {
+    display: grid;
+    grid-template-columns: 7.5em minmax(0, 1fr) auto;
+    gap: 20px;
+    align-items: baseline;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .ach-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .ach-note {
+    margin-top: 4px;
+    font-size: 0.82rem;
+    color: var(--text-faint);
+  }
+
+  .ach-when {
+    font-family: var(--f-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 560px) {
+    .achievement {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 6px 16px;
+    }
+
+    .ach-kind {
+      grid-column: 1 / -1;
+    }
   }
 
   .contact-lead {

@@ -54,3 +54,11 @@ export const FACTS: { label: string; value: string; href?: string }[] = [
   { label: '主な言語', value: 'C++ / C# / HLSL / Python' },
   { label: 'GitHub', value: SITE.githubHandle, href: SITE.github },
 ];
+
+/** 資格・実績。上から順に表示されます。 */
+export const ACHIEVEMENTS: { kind: string; title: string; when?: string; note?: string }[] = [
+  { kind: '資格', title: '基本情報技術者試験 合格' },
+  { kind: '受賞', title: '進級制作展（HAL EVENT WEEK）独創力賞', when: '1年次' },
+  { kind: '受賞', title: '進級制作展（HAL EVENT WEEK）ビジュアル賞', when: '2年次' },
+  { kind: 'インターン', title: 'ゲーム会社のインターンシップに参加', note: 'NDA のため社名は非公開' },
+];
