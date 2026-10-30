@@ -134,22 +134,15 @@ const auto straight = [&](double premultiplied) {
 
 ```mermaid
 sequenceDiagram
-    actor User as 利用者
-    participant Dialog as WinUI ダイアログ
-    participant Worker as バックグラウンド処理
-    participant Core as core/animation
-    participant UI as UI Dispatcher
-
-    User->>Dialog: プレビューを開く
-    Dialog->>Worker: LoadAsync
-    Worker->>Core: デコード・切り出し・中央配置
-    Core-->>Worker: 共通寸法のフレーム列
-    Worker->>UI: 完成したビットマップを配送
-    UI->>Dialog: タイマーでフレーム更新
-    User->>Dialog: 閉じる
-    Dialog->>Dialog: closing を立て、タイマー停止
-    Worker-->>UI: 遅れて完了した結果
-    UI-->>UI: closing を確認して破棄
+    participant UI as UI スレッド
+    participant BG as バックグラウンド
+    UI->>BG: 読み込みを依頼
+    BG->>BG: デコード・切り出し・<br/>中央配置
+    BG-->>UI: 完成したフレームだけ渡す
+    UI->>UI: タイマーで再生
+    Note over UI: 閉じたらタイマーを止める
+    BG-->>UI: 遅れて届いた結果
+    UI->>UI: 閉じていれば捨てる
 ```
 
 拡大表示（1x / 2x / 4x / 8x）は補間を効かせず最近傍で作り直すので、ドット絵が滲みません。1フレームが 16 Mpx を超える倍率は拒否して、一時メモリが膨らまないようにしています。

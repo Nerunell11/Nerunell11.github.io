@@ -88,26 +88,13 @@ SystemScheduler *-- EntityCommandBuffer : システムごとに1つ
 1フレームの実行の流れです。
 
 ```mermaid
-sequenceDiagram
-participant F as フレーム
-participant S as SystemScheduler
-participant J as JobSystem
-participant Y as System
-participant W as World
-participant C as EntityCommandBuffer
-F->>S: Run(World, JobSystem)
-S->>S: アクセス集合から<br/>ウェーブを決める
-loop ウェーブを順に
-  S->>J: 同じウェーブの<br/>システムを投入
-  J->>Y: SystemContext を<br/>渡して実行
-  Y->>W: 宣言した<br/>コンポーネントだけ読み書き
-  Y->>C: 構造変更を積む
-  S->>J: 全ジョブの完了を待つ
-  J-->>S: ウェーブ完了
-  S->>C: 登録順に適用
-  C->>W: 生成・破棄・追加・削除
-end
-S-->>F: 全システム完了
+flowchart TD
+    A["アクセス集合から<br/>ウェーブを決める"] --> B["同じウェーブのシステムを<br/>ジョブとして並列実行"]
+    B --> C["全ジョブの完了を待つ"]
+    C --> D["コマンドバッファを<br/>登録順に適用"]
+    D --> E{"次のウェーブがある？"}
+    E -->|"ある"| B
+    E -->|"ない"| F["フレーム完了"]
 ```
 
 ## デュアルRHI — DirectX 12 と Vulkan を同じAPIで
@@ -122,28 +109,12 @@ DirectX 12 と Vulkan は、コマンドバッファ・明示的同期・ディ�
 
 ```mermaid
 classDiagram
-direction TB
-class IDevice
-class ICommandList
-class ISwapchain
-class VulkanDevice
-class VulkanCommandList
-class VulkanSwapchain
-class D3D12Device
-class D3D12CommandList
-class D3D12Swapchain
-IDevice <|-- VulkanDevice
-IDevice <|-- D3D12Device
-ICommandList <|-- VulkanCommandList
-ICommandList <|-- D3D12CommandList
-ISwapchain <|-- VulkanSwapchain
-ISwapchain <|-- D3D12Swapchain
-VulkanDevice *-- VulkanCommandList
-VulkanDevice *-- VulkanSwapchain
-D3D12Device *-- D3D12CommandList
-D3D12Device *-- D3D12Swapchain
-IDevice --> ICommandList : フレームごとに提供
-IDevice --> ISwapchain : 生成
+    direction TB
+    IDevice <|-- D3D12Device
+    IDevice <|-- VulkanDevice
+    IDevice --> ICommandList : フレームごとに提供
+    ICommandList <|-- D3D12CommandList
+    ICommandList <|-- VulkanCommandList
 ```
 
 厚い抽象（OpenGL 風に隠蔽する形）は、商用レベルの性能要件と矛盾するため採りませんでした。DX11 / OpenGL 世代まで対応する案も、抽象化の最小公倍数が古い世代に引きずられて明示的APIの性能が出ないため却下しています。

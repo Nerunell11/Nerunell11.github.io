@@ -563,10 +563,11 @@ const d = work.data;
     background: var(--bg-sink);
   }
 
-  /* 縮小すると文字が読めなくなるので実寸で描き、はみ出す分は横スクロールにする */
+  /* 枠より大きい図は枠の幅まで縮める（小さい図は実寸のまま）。
+     縮めすぎると文字が読めなくなるので、図そのものを横に広げすぎないように描く */
   .prose :global(.diagram svg) {
     display: block;
-    max-width: none;
+    max-width: 100%;
     height: auto;
     margin: 0 auto;
   }
@@ -627,15 +628,22 @@ const d = work.data;
       try {
         const { svg } = await mermaid.render(`diagram-${i}`, code.textContent ?? '');
         box.innerHTML = svg;
-        // 図の種類によっては幅100%で縮められて文字が読めなくなるので、本来の寸法で描く
-        const el = box.querySelector('svg');
-        const vb = el?.viewBox.baseVal;
-        if (el && vb && vb.width > 0) {
-          el.setAttribute('width', String(Math.ceil(vb.width)));
-          el.setAttribute('height', String(Math.ceil(vb.height)));
-          el.style.maxWidth = 'none';
-        }
         pre.replaceWith(box);
+
+        // Mermaid の計算した外枠はクラス図で小さすぎて下が切れるので、実際に描かれた範囲で取り直す。
+        // 寸法は本来の大きさにし、枠より大きい場合だけ枠の幅まで縮める
+        const el = box.querySelector('svg');
+        if (el) {
+          const bb = el.getBBox();
+          const pad = 8;
+          const w = Math.ceil(bb.width + pad * 2);
+          const h = Math.ceil(bb.height + pad * 2);
+          el.setAttribute('viewBox', `${bb.x - pad} ${bb.y - pad} ${w} ${h}`);
+          el.setAttribute('width', String(w));
+          el.setAttribute('height', String(h));
+          el.style.maxWidth = '100%';
+          el.style.height = 'auto';
+        }
       } catch (e) {
         // 図にできなかった場合はコードのまま残す
         console.error('mermaid:', e);
