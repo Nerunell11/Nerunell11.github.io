@@ -60,5 +60,5 @@ export const ACHIEVEMENTS: { kind: string; title: string; when?: string; note?: 
   { kind: '資格', title: '基本情報技術者試験 合格' },
   { kind: '受賞', title: '進級制作展（HAL EVENT WEEK）独創力賞', when: '1年次' },
   { kind: '受賞', title: '進級制作展（HAL EVENT WEEK）ビジュアル賞', when: '2年次', note: '作品: Sentiment', href: '/works/sentiment/' },
-  { kind: 'インターン', title: 'ゲーム会社のインターンシップに参加', note: 'NDA のため社名は非公開' },
+  { kind: 'インターン', title: '株式会社フロム・ソフトウェア インターンシップ参加', note: 'NDA のため詳細は非公開' },
 ];
