@@ -1,6 +1,6 @@
 ---
 title: Sentiment
-period: 2025.10 - 2026.03（5ヶ月）
+period: 2025.11 - 2026.03（5ヶ月）
 category: チーム制作
 role: メインプログラマー
 tech: ["C++", "DirectX 11", "HLSL"]
