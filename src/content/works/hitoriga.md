@@ -7,6 +7,7 @@ tech: ["Unity", "C#"]
 summary: |-
   見下ろし視点のローグライト・アクション。
   左右の手に別々の銃を持ち、ランダムに選ばれる部屋を攻略していきます。
+cover: /images/works/hitoriga-key.webp
 order: 30
 ongoing: true
 links: []

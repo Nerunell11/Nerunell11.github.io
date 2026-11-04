@@ -7,6 +7,7 @@ tech: ["Unity", "C#", "Netcode for GameObjects"]
 summary: |-
   3対3のサッカーと三人称シューターを組み合わせた対戦ゲーム。
   最大6人のオンライン対戦に対応しています。
+cover: /images/works/ballistic-key.webp
 order: 32
 ongoing: true
 links: []
