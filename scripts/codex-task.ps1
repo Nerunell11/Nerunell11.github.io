@@ -2,7 +2,12 @@
 # Example: ./scripts/codex-task.ps1 -Prompt "..." -OutFile out/codex/task1.md
 # NOTE: keep this file ASCII-only. PowerShell 5.1 misparses BOM-less UTF-8 with non-ASCII chars.
 param(
-    [Parameter(Mandatory = $true)][string]$Prompt,
+    [string]$Prompt = '',
+    # Read the prompt from a file instead (UTF-8). Used by the codex-runner agent.
+    [string]$PromptFile = '',
+    # Codex profile in ~/.codex (light / impl / deep). Sets model and effort together.
+    [ValidateSet('', 'light', 'impl', 'deep')]
+    [string]$Profile = '',
     # NOTE: on Windows this codex build silently downgrades 'workspace-write' to
     # read-only (native sandboxing was removed), so the user opted to run write
     # tasks with 'danger-full-access' (2026-07-03). Scope tasks tightly and review
@@ -22,6 +27,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+if ($PromptFile) { $Prompt = [System.IO.File]::ReadAllText((Resolve-Path $PromptFile), [System.Text.Encoding]::UTF8) }
+if (-not $Prompt) { throw 'Specify -Prompt or -PromptFile.' }
 $root = Split-Path $PSScriptRoot -Parent
 if (-not $WorkDir) { $WorkDir = $root }
 
@@ -33,6 +40,7 @@ if ($OutFile) {
 }
 
 $codexArgs = @('exec', '-s', $Sandbox, '--color', 'never', '-C', $WorkDir)
+if ($Profile) { $codexArgs += @('-p', $Profile) }
 if ($Model)   { $codexArgs += @('-m', $Model) }
 if ($Effort)  { $codexArgs += @('-c', "model_reasoning_effort=$Effort") }
 if ($OutFile) { $codexArgs += @('-o', $OutFile) }
