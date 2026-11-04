@@ -24,8 +24,10 @@ interface Props {
 }
 
 const { work, prev, next } = Astro.props;
-const { Content } = await render(work);
+const { Content, headings } = await render(work);
 const d = work.data;
+// 目次には h2 と h3 だけを出す（h4 まで出すと長くなりすぎる）
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
 <Base title={d.title} description={d.summary} padTop>
@@ -70,6 +72,7 @@ const d = work.data;
         <Content />
       </div>
 
+      <div class="side-col">
       <aside class="side">
         <section class="block">
           <h2 class="mono-label">制作期間</h2>
@@ -124,6 +127,24 @@ const d = work.data;
           )
         }
       </aside>
+
+      {
+        toc.length > 1 && (
+          <nav class="toc" aria-label="目次">
+            <p class="mono-label toc-title">目次</p>
+            <ol>
+              {toc.map((h) => (
+                <li class={`toc-d${h.depth}`}>
+                  <a href={`#${h.slug}`} data-slug={h.slug}>
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )
+      }
+      </div>
     </div>
 
     <!-- 前後の作品 -->
@@ -279,15 +300,7 @@ const d = work.data;
     letter-spacing: -0.02em;
     line-height: 1.3;
     color: var(--text);
-    margin: 2.4em 0 0.8em;
-    padding-top: 1.2em;
-    border-top: 1px solid var(--line);
-  }
-
-  .prose :global(h2:first-child) {
-    margin-top: 0;
-    padding-top: 0;
-    border-top: none;
+    margin: 0;
   }
 
   .prose :global(h3) {
@@ -295,7 +308,85 @@ const d = work.data;
     font-size: 1.15rem;
     font-weight: 700;
     color: var(--text);
-    margin: 1.8em 0 0.6em;
+    margin: 0;
+  }
+
+  /* ---------- 見出しごとの開閉（details / summary） ---------- */
+  .prose :global(.sec-2) {
+    margin-top: 2.4em;
+    padding-top: 1.2em;
+    border-top: 1px solid var(--line);
+  }
+
+  .prose :global(.sec-2:first-child) {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .prose :global(.sec-3) {
+    margin-top: 1.8em;
+  }
+
+  .prose :global(.sec > summary) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .prose :global(.sec > summary::-webkit-details-marker) {
+    display: none;
+  }
+
+  /* 右端の開閉ボタン。開いているときは下向き、閉じているときは右向き */
+  .prose :global(.sec > summary::after) {
+    content: '';
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background:
+      no-repeat center / 10px 10px
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 3.5 5 7l3.5-3.5' fill='none' stroke='%23ff6b2c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    transition:
+      transform 0.25s var(--ease),
+      border-color 0.25s var(--ease);
+  }
+
+  .prose :global(.sec:not([open]) > summary::after) {
+    transform: rotate(-90deg);
+  }
+
+  .prose :global(.sec-3 > summary::after) {
+    width: 24px;
+    height: 24px;
+  }
+
+  .prose :global(.sec > summary:hover::after) {
+    border-color: var(--accent);
+  }
+
+  .prose :global(.sec > summary:focus-visible) {
+    outline: 1px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  .prose :global(.sec-2 > .sec-body) {
+    padding-top: 0.8em;
+  }
+
+  .prose :global(.sec-3 > .sec-body) {
+    padding-top: 0.6em;
+  }
+
+  /* 節の先頭の要素は、見出しとの間を詰めすぎないよう上の余白を消す */
+  .prose :global(.sec-body > :first-child) {
+    margin-top: 0;
   }
 
   /* h3 の下の小見出し。アクセントの縦線で階層を示す。 */
@@ -425,9 +516,62 @@ const d = work.data;
   }
 
   /* ---------- サイド ---------- */
-  .side {
+  /* 列は本文の高さいっぱいに伸ばし、その中で目次だけを追従させる */
+  .side-col {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .toc {
     position: sticky;
     top: calc(var(--header-h) + 32px);
+    max-height: calc(100vh - var(--header-h) - 64px);
+    overflow-y: auto;
+    padding: 22px 26px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .toc-title {
+    margin-bottom: 12px;
+  }
+
+  .toc ol {
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--line);
+  }
+
+  .toc a {
+    display: block;
+    margin-left: -1px;
+    padding: 5px 0 5px 14px;
+    border-left: 1px solid transparent;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--text-faint);
+    transition:
+      color 0.2s var(--ease),
+      border-color 0.2s var(--ease);
+  }
+
+  .toc .toc-d3 a {
+    padding-left: 28px;
+    font-size: 0.8rem;
+  }
+
+  .toc a:hover {
+    color: var(--text);
+  }
+
+  .toc a.is-active {
+    color: var(--accent-hi);
+    border-left-color: var(--accent);
+  }
+
+  .side {
     display: flex;
     flex-direction: column;
     gap: 28px;
@@ -514,8 +658,9 @@ const d = work.data;
       grid-template-columns: minmax(0, 1fr);
     }
 
-    .side {
-      position: static;
+    /* 1列のときはサイドが本文の後ろに来るので、目次は出さない */
+    .toc {
+      display: none;
     }
   }
 
@@ -572,6 +717,56 @@ const d = work.data;
     margin: 0 auto;
   }
 </style>
+
+<script>
+  // 目次: 閉じた節の中へ飛ぶときは先に節を開く。読んでいる位置の見出しを強調する
+  const openTo = (el: Element | null) => {
+    for (let p = el?.parentElement; p; p = p.parentElement) {
+      if (p instanceof HTMLDetailsElement) p.open = true;
+    }
+  };
+
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.toc a[data-slug]'));
+  const targets = links.map((a) => document.getElementById(a.dataset.slug!));
+
+  for (const a of links) {
+    a.addEventListener('click', () => openTo(document.getElementById(a.dataset.slug!)));
+  }
+  if (location.hash) openTo(document.getElementById(decodeURIComponent(location.hash.slice(1))));
+
+  if (links.length > 0) {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const line = window.innerHeight * 0.3;
+      let current = -1;
+      targets.forEach((t, i) => {
+        if (!t) return;
+        const r = t.getBoundingClientRect();
+        // 閉じた節の中の見出しは大きさが 0 になるので数えない
+        if (r.height > 0 && r.top <= line) current = i;
+      });
+      // 一番下まで来たら、画面内にある最後の見出しを選ぶ（短い最後の節が選ばれないままになるため）
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+        targets.forEach((t, i) => {
+          const r = t?.getBoundingClientRect();
+          if (r && r.height > 0 && r.top < window.innerHeight) current = i;
+        });
+      }
+      links.forEach((a, i) => a.classList.toggle('is-active', i === current));
+    };
+    const request = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request);
+    document.querySelectorAll('.prose details').forEach((d) => d.addEventListener('toggle', request));
+    update();
+  }
+</script>
 
 <script>
   // ```mermaid のブロックを図に置き換える。該当がなければ mermaid 本体は読み込まない
