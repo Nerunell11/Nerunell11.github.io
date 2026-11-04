@@ -1,8 +1,15 @@
-// 本文の h2 / h3 ごとに、見出しとその下の内容を <details open> で包む。
+// 本文の h2 / h3 ごとに、見出しとその下の内容を <details> で包む。
 // 見出しは <summary> の中に入るので、見出しをクリックすると節を開閉できる。
-// JavaScript がなくても開閉でき、最初はすべて開いた状態で出す。
+// JavaScript がなくても開閉できる。最初は「概要」の節だけを開き、ほかの大見出しは閉じておく
+// （小見出しは開いたままにして、大見出しを開いたときに中身がすべて見えるようにする）。
 
 const MAX_DEPTH = 3;
+const OPEN_BY_DEFAULT = ['概要'];
+
+function textOf(node) {
+  if (node.type === 'text') return node.value;
+  return (node.children ?? []).map(textOf).join('');
+}
 
 function headingLevel(node) {
   if (node.type !== 'element') return 0;
@@ -36,7 +43,11 @@ function wrap(children, depth) {
     out.push({
       type: 'element',
       tagName: 'details',
-      properties: { className: ['sec', `sec-${depth}`], open: true },
+      // open: false を渡すと属性が残ってしまうので、開くときだけ付ける
+      properties: {
+        className: ['sec', `sec-${depth}`],
+        ...((depth > 2 || OPEN_BY_DEFAULT.includes(textOf(node).trim())) && { open: true }),
+      },
       children: [
         { type: 'element', tagName: 'summary', properties: {}, children: [node] },
         { type: 'element', tagName: 'div', properties: { className: ['sec-body'] }, children: body },

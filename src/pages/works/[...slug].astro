@@ -822,12 +822,15 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
       box.className = 'diagram';
       try {
         const { svg } = await mermaid.render(`diagram-${i}`, code.textContent ?? '');
-        box.innerHTML = svg;
-        pre.replaceWith(box);
 
         // Mermaid の計算した外枠はクラス図で小さすぎて下が切れるので、実際に描かれた範囲で取り直す。
+        // 閉じた節の中では大きさを測れないため、画面外の見える場所に一度置いて測る。
         // 寸法は本来の大きさにし、枠より大きい場合だけ枠の幅まで縮める
-        const el = box.querySelector('svg');
+        const probe = document.createElement('div');
+        probe.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden';
+        probe.innerHTML = svg;
+        document.body.append(probe);
+        const el = probe.querySelector('svg');
         if (el) {
           const bb = el.getBBox();
           const pad = 8;
@@ -838,7 +841,10 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
           el.setAttribute('height', String(h));
           el.style.maxWidth = '100%';
           el.style.height = 'auto';
+          box.append(el);
         }
+        probe.remove();
+        pre.replaceWith(box);
       } catch (e) {
         // 図にできなかった場合はコードのまま残す
         console.error('mermaid:', e);
