@@ -21,6 +21,35 @@ OS とツールチェーン相当のもの以外は、原則として外部ラ�
 
 設計上の制約として、**例外と RTTI を使いません**。エラーは `Result<T>` とアサートで扱い、`new` / `delete` を直接書かずアロケータ経由で確保します。
 
+
+エンジン全体の構成です。矢印は「使う側 → 使われる側」で、各モジュールの CMake の依存関係に沿っています。
+
+```mermaid
+flowchart TD
+    Apps["アプリケーション<br/>Editor・Samples・Server"]
+    Runtime["実行基盤<br/>Runtime"]
+    Resource["リソース<br/>Resource"]
+    Scene["シーン（並列ECS）<br/>Scene"]
+    Features["ゲーム機能<br/>Physics・Audio・AI<br/>Animation・Network"]
+    Renderer["レンダラ<br/>Renderer"]
+    RHI["描画APIの抽象化<br/>RHI（DX12・Vulkan）"]
+    Platform["OSの抽象化<br/>Platform"]
+    Foundation["基盤<br/>Foundation"]
+    Apps --> Runtime
+    Apps --> Resource
+    Apps --> Scene
+    Apps --> Features
+    Resource --> Renderer
+    Resource --> Features
+    Runtime --> Features
+    Runtime --> RHI
+    Renderer --> RHI
+    RHI --> Platform
+    Platform --> Foundation
+    Scene --> Foundation
+    Features --> Foundation
+```
+
 ## 並列ECS — 衝突をコードに宣言させる
 
 ### 解きたかった問題

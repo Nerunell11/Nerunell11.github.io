@@ -17,6 +17,28 @@ links: []
 
 DirectX 11 を初めて使って制作した2Dゲームで、制作期間は2週間でした。
 
+
+ゲーム全体の構成です。
+
+```mermaid
+flowchart TD
+    Main["起動・メインループ<br/>core/main.cpp"]
+    Manager["シーン管理<br/>scene/scene.cpp"]
+    Scenes["各画面・ゲームモード<br/>scene/*"]
+    Game["盤面・ブロック・操作<br/>game/*"]
+    Graphics["描画（DirectX 11）<br/>graphics/*"]
+    Input["入力（キーボード・XInput）<br/>input/*"]
+    Audio["音声（XAudio2）<br/>audio/*"]
+    Main --> Manager
+    Manager --> Scenes
+    Scenes --> Game
+    Scenes --> Input
+    Scenes --> Graphics
+    Scenes --> Audio
+    Game --> Graphics
+    Game --> Audio
+```
+
 ## 技術的に取り組んだこと
 
 ### 工夫点1 — シーン生成を CreateScene に一本化

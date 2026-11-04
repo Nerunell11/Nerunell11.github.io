@@ -15,7 +15,10 @@ param(
     [ValidateSet('', 'minimal', 'low', 'medium', 'high')]
     [string]$Effort = '',
     [string]$OutFile = '',    # file to write Codex's final message to
-    [string]$WorkDir = ''     # empty = repository root
+    [string]$WorkDir = '',    # empty = repository root
+    # Allow running in a directory that is not a git repository (e.g. a Unity project).
+    # Use together with -Sandbox read-only.
+    [switch]$SkipGitCheck
 )
 
 $ErrorActionPreference = 'Stop'
@@ -33,6 +36,7 @@ $codexArgs = @('exec', '-s', $Sandbox, '--color', 'never', '-C', $WorkDir)
 if ($Model)   { $codexArgs += @('-m', $Model) }
 if ($Effort)  { $codexArgs += @('-c', "model_reasoning_effort=$Effort") }
 if ($OutFile) { $codexArgs += @('-o', $OutFile) }
+if ($SkipGitCheck) { $codexArgs += '--skip-git-repo-check' }
 
 # Pass the prompt via stdin (codex reads instructions from stdin when no PROMPT
 # argument is given). Passing it as an argv element is unreliable in PowerShell 5.1:

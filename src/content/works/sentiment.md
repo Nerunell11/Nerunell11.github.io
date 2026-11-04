@@ -23,6 +23,28 @@ links: []
 
 2年次の進級制作展（HAL EVENT WEEK）で、**ビジュアル賞**を受賞しました。
 
+
+ゲーム全体の構成です（チーム全員のコードを含みます）。
+
+```mermaid
+flowchart TD
+    App["起動・シーン制御<br/>Application・Scenes"]
+    Systems["ゲームロジック<br/>Systems"]
+    UI["UI<br/>Graphics/UI"]
+    ECS["ECS・イベント<br/>ECS・Events"]
+    Gfx["描画<br/>Graphics/Core・Rendering"]
+    Data["データ・アセット<br/>Data・Assets"]
+    Input["入力<br/>Input"]
+    App --> Systems
+    App --> UI
+    App --> Input
+    App --> Gfx
+    Systems --> ECS
+    Systems --> Data
+    Systems --> Gfx
+    UI --> ECS
+```
+
 ## 自分が担当した部分
 
 メインプログラマーとして、**フレームワーク・経路探索・描画系**を主に担当しました。
