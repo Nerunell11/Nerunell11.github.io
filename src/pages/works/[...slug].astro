@@ -220,10 +220,10 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
     align-items: center;
     gap: 7px;
     padding: 3px 11px 3px 9px;
-    border: 1px solid var(--accent-line);
+    border: 1px solid var(--hot-line);
     border-radius: 999px;
-    background: var(--accent-soft);
-    color: var(--accent-hi);
+    background: var(--hot-soft);
+    color: var(--hot-hi);
     font-family: var(--f-mono);
     font-size: 0.68rem;
     letter-spacing: 0.1em;
@@ -234,7 +234,7 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--hot);
     animation: pulse 2s ease-out infinite;
   }
 
@@ -469,7 +469,7 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
     padding: 2px 6px;
     border-radius: 3px;
     background: var(--surface-hi);
-    color: var(--accent-warm);
+    color: var(--accent-hi);
   }
 
   .prose :global(pre) {
@@ -684,7 +684,7 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
     margin: 0 0 14px;
   }
 
-  /* 受賞バッジ。開発中バッジ（アクセント色）と区別するため琥珀色にする */
+  /* 受賞バッジ。開発中バッジ（マゼンタ）と区別するため琥珀色にする */
   .award {
     display: inline-flex;
     align-items: center;
