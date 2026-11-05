@@ -6,7 +6,7 @@ tech: ["C++", "C#", "DirectX 12", "Vulkan", "HLSL"]
 summary: |-
   C++20 でフルスクラッチ開発している 2D/3D ゲームエンジン。
   並列ECSを中核に据え、DirectX 12 と Vulkan を自作のRHIで抽象化しています。
-cover: /images/works/nexus-pbr.webp
+cover: /images/works/nexus-nightcrossing-cover.webp
 order: 20
 featured: true
 ongoing: true
@@ -24,23 +24,23 @@ OS とツールチェーン相当のもの以外は、原則として外部ラ�
 ゲームロジックは C++ に加えて **C# でも書けるようにする**計画です。.NET ランタイム（CoreCLR）を読み込むホスト層を自作し、現在はエンジンから C# の関数を呼び出せる段階まで来ています。
 
 
-エンジン全体の構成です。矢印は「使う側 → 使われる側」で、各モジュールの CMake の依存関係に沿っています。
+エンジン全体の構成です。矢印は「使う側 → 使われる側」で、各モジュールの CMake の依存関係に沿っています。基盤（Foundation）はほかのすべてのモジュールが使う土台なので、そこへ向かう矢印は Platform からの1本だけにしています。
 
 ```mermaid
 flowchart TD
     Apps["アプリケーション<br/>Editor・Samples・Server"]
-    Runtime["実行基盤<br/>Runtime"]
     Resource["リソース<br/>Resource"]
+    Runtime["実行基盤<br/>Runtime"]
     Scene["シーン（並列ECS）<br/>Scene"]
-    Features["ゲーム機能<br/>Physics・Audio・AI<br/>Animation・Network"]
     Renderer["レンダラ<br/>Renderer"]
+    Features["ゲーム機能<br/>Physics・Audio・AI<br/>Animation・Network"]
     RHI["描画APIの抽象化<br/>RHI（DX12・Vulkan）"]
     Platform["OSの抽象化<br/>Platform"]
-    Foundation["基盤<br/>Foundation"]
-    Apps --> Runtime
+    Foundation["基盤（全モジュールが使う）<br/>Foundation"]
     Apps --> Resource
-    Apps --> Scene
     Apps --> Features
+    Apps --> Runtime
+    Apps --> Scene
     Resource --> Renderer
     Resource --> Features
     Runtime --> Features
@@ -48,8 +48,6 @@ flowchart TD
     Renderer --> RHI
     RHI --> Platform
     Platform --> Foundation
-    Scene --> Foundation
-    Features --> Foundation
 ```
 
 ## 並列ECS — 衝突をコードに宣言させる
@@ -101,21 +99,21 @@ scheduler.Add<nx::Reads<TdVelocity>, nx::Writes<TdPosition>>(
 ```mermaid
 classDiagram
 direction TB
-class World
-class Archetype
-class Chunk
 class SystemScheduler
 class SystemContext
 class JobSystem
+class World
 class EntityCommandBuffer
-World *-- Archetype : 保持
-Archetype *-- Chunk : 所有
-SystemScheduler --> JobSystem : ジョブを投入
+class Archetype
+class Chunk
 SystemScheduler --> SystemContext : 実行ごとに生成
-SystemContext --> World : 読み書き
+SystemScheduler --> JobSystem : ジョブを投入
 SystemContext --> JobSystem : チャンクを分配
+SystemContext --> World : 読み書き
 SystemContext --> EntityCommandBuffer : 構造変更を積む
 SystemScheduler *-- EntityCommandBuffer : システムごとに1つ
+World *-- Archetype : 保持
+Archetype *-- Chunk : 所有
 ```
 
 1フレームの実行の流れです。
