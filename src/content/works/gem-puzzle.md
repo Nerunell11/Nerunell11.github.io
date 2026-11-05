@@ -25,15 +25,15 @@ flowchart TD
     Main["起動・メインループ<br/>core/main.cpp"]
     Manager["シーン管理<br/>scene/scene.cpp"]
     Scenes["各画面・ゲームモード<br/>scene/*"]
+    Input["入力（キーボード・XInput）<br/>input/*"]
     Game["盤面・ブロック・操作<br/>game/*"]
     Graphics["描画（DirectX 11）<br/>graphics/*"]
-    Input["入力（キーボード・XInput）<br/>input/*"]
     Audio["音声（XAudio2）<br/>audio/*"]
     Main --> Manager
     Manager --> Scenes
-    Scenes --> Game
-    Scenes --> Input
     Scenes --> Graphics
+    Scenes --> Input
+    Scenes --> Game
     Scenes --> Audio
     Game --> Graphics
     Game --> Audio

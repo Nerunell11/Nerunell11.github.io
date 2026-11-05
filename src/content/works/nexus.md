@@ -99,21 +99,21 @@ scheduler.Add<nx::Reads<TdVelocity>, nx::Writes<TdPosition>>(
 ```mermaid
 classDiagram
 direction TB
-class World
-class Archetype
-class Chunk
 class SystemScheduler
 class SystemContext
 class JobSystem
+class World
 class EntityCommandBuffer
-World *-- Archetype : 保持
-Archetype *-- Chunk : 所有
-SystemScheduler --> JobSystem : ジョブを投入
+class Archetype
+class Chunk
 SystemScheduler --> SystemContext : 実行ごとに生成
-SystemContext --> World : 読み書き
+SystemScheduler --> JobSystem : ジョブを投入
 SystemContext --> JobSystem : チャンクを分配
+SystemContext --> World : 読み書き
 SystemContext --> EntityCommandBuffer : 構造変更を積む
 SystemScheduler *-- EntityCommandBuffer : システムごとに1つ
+World *-- Archetype : 保持
+Archetype *-- Chunk : 所有
 ```
 
 1フレームの実行の流れです。
