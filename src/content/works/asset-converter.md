@@ -10,6 +10,7 @@ cover: /images/works/asset-converter-ui.webp
 order: 10
 featured: true
 ongoing: true
+released: true
 links:
   - label: Microsoft Store
     url: https://apps.microsoft.com/detail/9MVQS11M6ZBH

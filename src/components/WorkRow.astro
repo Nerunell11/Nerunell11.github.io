@@ -17,10 +17,12 @@ interface Props {
   cover?: string;
   /** 継続中の作品。「開発中」バッジを出す */
   ongoing?: boolean;
+  /** 公開・配布中の作品。「公開中」バッジを出す */
+  released?: boolean;
   awards?: { label: string; detail?: string }[];
 }
 
-const { slug, index, title, period, category, role, tech, summary, cover, ongoing, awards = [] } =
+const { slug, index, title, period, category, role, tech, summary, cover, ongoing, released, awards = [] } =
   Astro.props;
 const num = String(index + 1).padStart(2, '0');
 ---
@@ -45,6 +47,7 @@ const num = String(index + 1).padStart(2, '0');
         <span>{period}</span>
         <span class="dot" aria-hidden="true"></span>
         <span>{category}</span>
+        {released && <span class="released">公開中</span>}
         {ongoing && (
           <span class="live">
             <span class="live-dot" aria-hidden="true" />
@@ -199,6 +202,21 @@ const num = String(index + 1).padStart(2, '0');
     border-radius: 999px;
     background: var(--hot-soft);
     color: var(--hot-hi);
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: none;
+  }
+
+  /* 公開・配布中を示すバッジ。主色（アクセント）で受け、マゼンタ・琥珀と区別する。 */
+  .released {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 11px;
+    border: 1px solid var(--accent-line);
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-hi);
     font-family: var(--f-mono);
     font-size: 0.68rem;
     letter-spacing: 0.1em;
