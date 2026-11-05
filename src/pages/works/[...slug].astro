@@ -40,6 +40,7 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
         <span>{d.period}</span>
         <span class="dot" aria-hidden="true"></span>
         <span>{d.category}</span>
+        {d.released && <span class="released">公開中</span>}
         {
           d.ongoing && (
             <span class="live">
@@ -224,6 +225,21 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
     border-radius: 999px;
     background: var(--hot-soft);
     color: var(--hot-hi);
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: none;
+  }
+
+  /* 公開・配布中を示すバッジ。主色（アクセント）で受け、マゼンタ・琥珀と区別する。 */
+  .released {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 11px;
+    border: 1px solid var(--accent-line);
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-hi);
     font-family: var(--f-mono);
     font-size: 0.68rem;
     letter-spacing: 0.1em;

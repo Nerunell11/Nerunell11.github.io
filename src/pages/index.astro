@@ -13,8 +13,6 @@ const works = (await getCollection('works', ({ data }) => import.meta.env.DEV ||
 // 絞り込みボタンは実際に使われている技術から組み立てる
 const techs = [...new Set(works.flatMap((w) => w.data.tech))].sort((a, b) => a.localeCompare(b, 'ja'));
 
-const MAX_LEVEL = 5;
-
 // スキルのアイコン（Simple Icons, CC0）。外部に読みに行かず、ビルド時にインライン化する
 const ICONS = Object.fromEntries(
   Object.entries(
@@ -108,6 +106,7 @@ const ICONS = Object.fromEntries(
               summary={work.data.summary}
               cover={work.data.cover}
               ongoing={work.data.ongoing}
+              released={work.data.released}
               awards={work.data.awards}
             />
           ))
@@ -142,16 +141,6 @@ const ICONS = Object.fromEntries(
                       )}
                       <span class="skill-name">{item.name}</span>
                       {item.note && <span class="skill-note">{item.note}</span>}
-                      <span class="skill-lv">
-                        {item.level}/{MAX_LEVEL}
-                      </span>
-                    </div>
-                    <div
-                      class="meter"
-                      role="img"
-                      aria-label={`${item.name} の習熟度 ${item.level} / ${MAX_LEVEL}`}
-                    >
-                      <span style={`width:${(item.level / MAX_LEVEL) * 100}%`} />
                     </div>
                   </li>
                 ))}
@@ -351,14 +340,13 @@ const ICONS = Object.fromEntries(
   }
 
   .skill + .skill {
-    margin-top: 22px;
+    margin-top: 14px;
   }
 
   .skill-head {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 9px;
   }
 
   .skill-icon {
@@ -401,25 +389,6 @@ const ICONS = Object.fromEntries(
   .skill-note {
     font-size: 0.74rem;
     color: var(--text-faint);
-  }
-
-  .skill-lv {
-    margin-left: auto;
-    font-family: var(--f-mono);
-    font-size: 0.7rem;
-    color: var(--text-faint);
-  }
-
-  .meter {
-    height: 2px;
-    background: var(--line-hi);
-    overflow: hidden;
-  }
-
-  .meter span {
-    display: block;
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--hot));
   }
 
   /* ---------- Contact ---------- */
