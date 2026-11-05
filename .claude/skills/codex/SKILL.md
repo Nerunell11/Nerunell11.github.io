@@ -20,12 +20,15 @@ Claude は発注者兼レビュアーとして、プロンプト作成と結果�
    **探索させない。** Codex の消費は「ターン数 × 文脈の大きさ」で決まる。読むべきファイル・節・行を指定し、全体を読ませない。
    - 本文は日本語。frontmatter のスキーマは `src/content.config.ts`
    - 検証は `npm run build` の末尾数行だけ見させる(全文ログを出させない)
-2. **委譲を実行する。** 長そうなら `run_in_background` で起動する。
+2. **委譲を実行する。** 原則 `codex-runner` エージェント (Haiku) に指示書・プロファイル・sandbox を渡して実行させ、
+   Codex のログをメインの文脈に入れない。プロファイルは `~/.codex/*.config.toml`:
+   `light` (gpt-6-luna / low: 調査・定型の書き換え)、`impl` (gpt-6.1-terra / medium: 本文下書き・実装)、
+   `deep` (gpt-6.1-sol / high: 原因不明の不具合)。直接呼ぶときは次の形 (長そうなら `run_in_background`):
 
    ```powershell
-   ./scripts/codex-task.ps1 -Prompt "<自己完結の指示>" -OutFile out/codex/task.md
-   ./scripts/codex-task.ps1 -Prompt "<機械的な編集>" -Effort low -OutFile out/codex/task.md
-   ./scripts/codex-task.ps1 -Prompt "<調査>" -Sandbox read-only -OutFile out/codex/answer.md
+   ./scripts/codex-task.ps1 -PromptFile out/codex/task.prompt.md -Profile impl -OutFile out/codex/task.md
+   ./scripts/codex-task.ps1 -Prompt "<機械的な編集>" -Profile light -OutFile out/codex/task.md
+   ./scripts/codex-task.ps1 -Prompt "<調査>" -Profile light -Sandbox read-only -OutFile out/codex/answer.md
    ```
 
    - Windows の codex はサンドボックスが効かないため、書き込みタスクの既定は `danger-full-access`。範囲を厳密に指示し、終了後に必ず `git diff` を見る。
