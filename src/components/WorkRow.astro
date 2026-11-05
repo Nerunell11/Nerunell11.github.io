@@ -141,7 +141,7 @@ const num = String(index + 1).padStart(2, '0');
     content: "";
     position: absolute;
     inset: 0;
-    background: radial-gradient(90% 70% at 25% 15%, rgba(255, 107, 44, 0.16), transparent 65%);
+    background: radial-gradient(90% 70% at 25% 15%, rgba(221, 10, 177, 0.16), transparent 65%);
     pointer-events: none;
   }
 
@@ -210,19 +210,19 @@ const num = String(index + 1).padStart(2, '0');
     height: 6px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 0 0 rgba(255, 107, 44, 0.7);
+    box-shadow: 0 0 0 0 rgba(221, 10, 177, 0.7);
     animation: pulse 2s ease-out infinite;
   }
 
   @keyframes pulse {
     0% {
-      box-shadow: 0 0 0 0 rgba(255, 107, 44, 0.65);
+      box-shadow: 0 0 0 0 rgba(221, 10, 177, 0.65);
     }
     70% {
-      box-shadow: 0 0 0 7px rgba(255, 107, 44, 0);
+      box-shadow: 0 0 0 7px rgba(221, 10, 177, 0);
     }
     100% {
-      box-shadow: 0 0 0 0 rgba(255, 107, 44, 0);
+      box-shadow: 0 0 0 0 rgba(221, 10, 177, 0);
     }
   }
 
@@ -308,7 +308,7 @@ const num = String(index + 1).padStart(2, '0');
     margin: 0 0 14px;
   }
 
-  /* 受賞バッジ。開発中バッジ（橙）と区別するため琥珀色にする */
+  /* 受賞バッジ。開発中バッジ（アクセント色）と区別するため琥珀色にする */
   .award {
     display: inline-flex;
     align-items: center;
@@ -316,7 +316,7 @@ const num = String(index + 1).padStart(2, '0');
     border: 1px solid rgba(255, 181, 71, 0.38);
     border-radius: 999px;
     background: rgba(255, 181, 71, 0.1);
-    color: var(--accent-warm);
+    color: var(--award);
     font-family: var(--f-mono);
     font-size: 0.68rem;
     letter-spacing: 0.06em;
