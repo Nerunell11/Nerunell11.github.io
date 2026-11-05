@@ -37,8 +37,10 @@ export const SKILLS: SkillGroup[] = [
     items: [
       { name: 'Visual Studio', icon: 'visualstudio', level: 5 },
       { name: 'Git / GitHub', icon: 'git', level: 4 },
+      { name: 'UVCS', mono: 'UVCS', level: 3, note: 'Unity Version Control' },
       { name: 'DirectX', mono: 'DX', level: 4 },
       { name: 'Unity', icon: 'unity', level: 4 },
+      { name: 'Unreal Engine 5', icon: 'unrealengine', level: 3 },
       { name: 'CMake', icon: 'cmake', level: 4 },
       { name: 'Vulkan', icon: 'vulkan', level: 3 },
       { name: 'Rider', icon: 'rider', level: 3 },
