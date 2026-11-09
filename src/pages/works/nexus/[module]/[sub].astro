@@ -1,0 +1,23 @@
+---
+import { getEntry, render } from 'astro:content';
+import NexusDoc from '../../../../layouts/NexusDoc.astro';
+import { DOC_MODULES, type MapModule } from '../../../../data/nexus-architecture';
+
+export function getStaticPaths() {
+  return DOC_MODULES.flatMap((mod) =>
+    mod.blocks
+      .filter((b) => b.slug)
+      .map((b) => ({ params: { module: mod.id, sub: b.slug! }, props: { mod, slug: b.slug! } }))
+  );
+}
+
+const { mod, slug } = Astro.props as { mod: MapModule; slug: string };
+const id = `${mod.id}/${slug}`;
+const entry = await getEntry('nexus', id);
+if (!entry) throw new Error(`構成図: src/content/nexus/${id}.md がありません`);
+const { Content } = await render(entry);
+---
+
+<NexusDoc mod={mod} slug={slug}>
+  <Content />
+</NexusDoc>

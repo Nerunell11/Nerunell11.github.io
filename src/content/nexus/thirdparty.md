@@ -11,3 +11,23 @@ Nexus は外部ライブラリに頼らず自作するのが原則です。例�
 - **DLSS / FSR**: 任意。ベンダー製のノイズ除去とアップスケーリングの呼び出しに限った例外です。ライセンスの都合でリポジトリには含めず、取得用のスクリプトで落とします。無くても自作の SVGF でビルドが通ります（ADR 032）。
 
 例外リストには libsodium（ネットワークの暗号化）もありますが、まだ組み込んでいません。Windows App SDK / WinUI 3 は旧エディタのシェル専用の例外で、C# の UI への移行で不要になる予定です。
+
+### 仕組み
+
+例外にしたライブラリには用途に応じた層を置いています。ImGui のターゲットは Foundation、Platform、RHI と ImGui をリンクします。
+
+```mermaid
+flowchart TD
+    A["Dear ImGui"] --> B["NexusImGui"] --> C["RHI"]
+```
+
+### 実装
+
+```cmake
+// Engine/ImGui/CMakeLists.txt
+add_library(NexusImGui STATIC ${NX_IMGUI_SOURCES} ${NX_IMGUI_HEADERS})
+add_library(Nexus::ImGui ALIAS NexusImGui)
+
+target_include_directories(NexusImGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)
+target_link_libraries(NexusImGui PUBLIC Nexus::Foundation Nexus::Platform Nexus::RHI imgui)
+```

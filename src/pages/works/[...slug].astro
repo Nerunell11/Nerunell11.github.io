@@ -2,7 +2,8 @@
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import ArchitectureMap from '../../components/ArchitectureMap.astro';
-import { moduleById } from '../../data/nexus-architecture';
+import MermaidDiagrams from '../../components/MermaidDiagrams.astro';
+import '../../styles/prose.css';
 
 export async function getStaticPaths() {
   const works = (
@@ -31,18 +32,6 @@ const d = work.data;
 // 目次には h2 と h3 だけを出す（h4 まで出すと長くなりすぎる）
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
-// Nexus だけ、全体構成図とそこから開く詳細を出す
-const archPanels =
-  work.id === 'nexus'
-    ? await Promise.all(
-        (await getCollection('nexus')).map(async (entry) => {
-          const { Content: PanelContent, headings: panelHeadings } = await render(entry);
-          const mod = moduleById(entry.id);
-          if (!mod) throw new Error(`構成図: ${entry.id}.md に対応するモジュールがありません`);
-          return { id: entry.id, mod, PanelContent, headings: panelHeadings };
-        })
-      )
-    : [];
 ---
 
 <Base title={d.title} description={d.summary} padTop>
@@ -83,31 +72,9 @@ const archPanels =
     }
 
     {
-      archPanels.length > 0 && (
+      work.id === 'nexus' && (
         <div class="wrap">
-          <ArchitectureMap
-            panels={archPanels.map((p) => ({ id: p.id, headings: p.headings }))}
-            pageHeadings={headings}
-          >
-            {/* .prose の文字組みを当てるため、詳細はこのページのテンプレートで描画する */}
-            {archPanels.map(({ id, mod, PanelContent }) => (
-              <section class="prose sys-panel" id={`sys-${id}`} hidden>
-                <header class="sys-head">
-                  <p class="sys-name">{mod.name}</p>
-                  <h2 class="sys-title">{mod.label}</h2>
-                  {mod.deps && mod.deps.length > 0 && (
-                    <p class="sys-deps">
-                      依存先
-                      {mod.deps.map((dep) => (
-                        <a href={`#sys-${dep}`}>{moduleById(dep)?.name}</a>
-                      ))}
-                    </p>
-                  )}
-                </header>
-                <PanelContent />
-              </section>
-            ))}
-          </ArchitectureMap>
+          <ArchitectureMap pageHeadings={headings} />
         </div>
       )
     }
@@ -346,236 +313,6 @@ const archPanels =
     align-items: start;
   }
 
-  /* ---------- 本文 ---------- */
-  .prose {
-    max-width: 72ch;
-    color: var(--text-dim);
-    font-size: 1rem;
-    line-height: 2;
-  }
-
-  .prose :global(h2) {
-    font-family: var(--f-display);
-    font-size: clamp(1.4rem, 3vw, 1.9rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.3;
-    color: var(--text);
-    margin: 0;
-  }
-
-  .prose :global(h3) {
-    font-family: var(--f-display);
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--text);
-    margin: 0;
-  }
-
-  /* ---------- 見出しごとの開閉（details / summary） ---------- */
-  .prose :global(.sec-2) {
-    margin-top: 2.4em;
-    padding-top: 1.2em;
-    border-top: 1px solid var(--line);
-  }
-
-  .prose :global(.sec-2:first-child) {
-    margin-top: 0;
-    padding-top: 0;
-    border-top: none;
-  }
-
-  .prose :global(.sec-3) {
-    margin-top: 1.8em;
-  }
-
-  .prose :global(.sec > summary) {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    cursor: pointer;
-    list-style: none;
-  }
-
-  .prose :global(.sec > summary::-webkit-details-marker) {
-    display: none;
-  }
-
-  /* 右端の開閉ボタン。開いているときは下向き、閉じているときは右向き */
-  .prose :global(.sec > summary::after) {
-    content: '';
-    flex: none;
-    width: 28px;
-    height: 28px;
-    border: 1px solid var(--line);
-    border-radius: 50%;
-    background:
-      no-repeat center / 10px 10px
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 3.5 5 7l3.5-3.5' fill='none' stroke='%23ff6b2c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    transition:
-      transform 0.25s var(--ease),
-      border-color 0.25s var(--ease);
-  }
-
-  .prose :global(.sec:not([open]) > summary::after) {
-    transform: rotate(-90deg);
-  }
-
-  .prose :global(.sec-3 > summary::after) {
-    width: 24px;
-    height: 24px;
-  }
-
-  .prose :global(.sec > summary:hover::after) {
-    border-color: var(--accent);
-  }
-
-  .prose :global(.sec > summary:focus-visible) {
-    outline: 1px solid var(--accent);
-    outline-offset: 4px;
-    border-radius: 2px;
-  }
-
-  .prose :global(.sec-2 > .sec-body) {
-    padding-top: 0.8em;
-  }
-
-  .prose :global(.sec-3 > .sec-body) {
-    padding-top: 0.6em;
-  }
-
-  /* 節の先頭の要素は、見出しとの間を詰めすぎないよう上の余白を消す */
-  .prose :global(.sec-body > :first-child) {
-    margin-top: 0;
-  }
-
-  /* h3 の下の小見出し。アクセントの縦線で階層を示す。 */
-  .prose :global(h4) {
-    font-family: var(--f-display);
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text);
-    margin: 1.8em 0 0.6em;
-    padding-left: 12px;
-    border-left: 2px solid var(--accent);
-  }
-
-  .prose :global(p) {
-    margin: 1.2em 0;
-  }
-
-  .prose :global(ul),
-  .prose :global(ol) {
-    margin: 1.2em 0;
-    padding-left: 1.4em;
-    list-style: disc;
-  }
-
-  .prose :global(ol) {
-    list-style: decimal;
-  }
-
-  .prose :global(li) {
-    margin: 0.4em 0;
-  }
-
-  .prose :global(li::marker) {
-    color: var(--accent);
-  }
-
-  .prose :global(a) {
-    color: var(--accent-hi);
-    border-bottom: 1px solid var(--accent-line);
-  }
-
-  .prose :global(a:hover) {
-    color: var(--accent);
-  }
-
-  .prose :global(strong) {
-    color: var(--text);
-    font-weight: 700;
-  }
-
-  .prose :global(video) {
-    display: block;
-    width: 100%;
-    height: auto;
-    margin: 2em 0;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--bg-sink);
-  }
-
-  /* 小さい画像を引き伸ばさない。コードのスクリーンショットがぼやけるため。 */
-  .prose :global(img) {
-    max-width: 100%;
-    height: auto;
-    margin: 2em 0;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-  }
-
-  .prose :global(blockquote) {
-    margin: 1.6em 0;
-    padding: 4px 0 4px 22px;
-    border-left: 2px solid var(--accent);
-    color: var(--text-dim);
-  }
-
-  .prose :global(code) {
-    font-family: var(--f-mono);
-    font-size: 0.86em;
-    padding: 2px 6px;
-    border-radius: 3px;
-    background: var(--surface-hi);
-    color: var(--accent-hi);
-  }
-
-  .prose :global(pre) {
-    margin: 1.8em 0;
-    padding: 20px 22px;
-    overflow-x: auto;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--bg-sink) !important;
-    line-height: 1.7;
-  }
-
-  .prose :global(pre code) {
-    padding: 0;
-    background: none;
-    color: inherit;
-    font-size: 0.84rem;
-  }
-
-  /* 狭い画面では表だけを横スクロールさせる（ページ全体をはみ出させない） */
-  .prose :global(table) {
-    display: block;
-    width: 100%;
-    overflow-x: auto;
-    margin: 1.8em 0;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-  }
-
-  .prose :global(th),
-  .prose :global(td) {
-    padding: 10px 11px;
-    border: 1px solid var(--line);
-    text-align: left;
-  }
-
-  .prose :global(th) {
-    background: var(--surface);
-    color: var(--text);
-    font-family: var(--f-mono);
-    font-size: 0.76rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
   /* ---------- サイド ---------- */
   /* 列は本文の高さいっぱいに伸ばし、その中で目次だけを追従させる */
   .side-col {
@@ -760,23 +497,6 @@ const archPanels =
     text-transform: none;
   }
 
-  .prose :global(.diagram) {
-    margin: 2em 0;
-    padding: 20px;
-    overflow-x: auto;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--bg-sink);
-  }
-
-  /* 枠より大きい図は枠の幅まで縮める（小さい図は実寸のまま）。
-     縮めすぎると文字が読めなくなるので、図そのものを横に広げすぎないように描く */
-  .prose :global(.diagram svg) {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    margin: 0 auto;
-  }
 </style>
 
 <script>
@@ -829,87 +549,4 @@ const archPanels =
   }
 </script>
 
-<script>
-  // ```mermaid のブロックを図に置き換える。該当がなければ mermaid 本体は読み込まない
-  const blocks = Array.from(document.querySelectorAll<HTMLElement>('.prose pre > code.language-mermaid'));
-
-  if (blocks.length > 0) {
-    const { default: mermaid } = await import('mermaid');
-    const css = getComputedStyle(document.documentElement);
-    const v = (name: string) => css.getPropertyValue(name).trim();
-
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: 'strict',
-      // HTML ラベルはこのページの CSS と干渉して箱の大きさを測り違えるので、SVG のテキストで描く。
-      // その代わりクラス図のメンバー欄は箱の高さに入らないため、クラス図にはメンバーを書かない
-      htmlLabels: false,
-      flowchart: { useMaxWidth: false, htmlLabels: false },
-      // 日本語を自動で折り返すとハイフンが入るので wrap はせず、長いラベルは本文側で <br/> を入れる
-      sequence: { useMaxWidth: false, wrap: false, width: 120, actorMargin: 24, boxMargin: 6, messageMargin: 30 },
-      class: { useMaxWidth: false },
-      theme: 'base',
-      themeVariables: {
-        darkMode: true,
-        background: 'transparent',
-        // 変数のまま渡すと文字幅を別のフォントで測ってしまうので、解決済みのフォント名を渡す
-        fontFamily: getComputedStyle(document.body).fontFamily,
-        fontSize: '14px',
-        primaryColor: v('--surface-hi'),
-        primaryTextColor: v('--text'),
-        primaryBorderColor: v('--line-hi'),
-        secondaryColor: v('--surface'),
-        tertiaryColor: v('--bg-raise'),
-        lineColor: v('--text-dim'),
-        textColor: v('--text'),
-        noteBkgColor: v('--surface'),
-        noteTextColor: v('--text-dim'),
-        noteBorderColor: v('--accent-line'),
-        actorBkg: v('--surface-hi'),
-        actorBorder: v('--accent'),
-        actorTextColor: v('--text'),
-        signalColor: v('--text-dim'),
-        signalTextColor: v('--text'),
-        labelBoxBkgColor: v('--surface'),
-        labelBoxBorderColor: v('--line-hi'),
-        clusterBkg: v('--bg-raise'),
-        clusterBorder: v('--line-hi'),
-      },
-    });
-
-    for (const [i, code] of blocks.entries()) {
-      const pre = code.parentElement!;
-      const box = document.createElement('div');
-      box.className = 'diagram';
-      try {
-        const { svg } = await mermaid.render(`diagram-${i}`, code.textContent ?? '');
-
-        // Mermaid の計算した外枠はクラス図で小さすぎて下が切れるので、実際に描かれた範囲で取り直す。
-        // 閉じた節の中では大きさを測れないため、画面外の見える場所に一度置いて測る。
-        // 寸法は本来の大きさにし、枠より大きい場合だけ枠の幅まで縮める
-        const probe = document.createElement('div');
-        probe.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden';
-        probe.innerHTML = svg;
-        document.body.append(probe);
-        const el = probe.querySelector('svg');
-        if (el) {
-          const bb = el.getBBox();
-          const pad = 8;
-          const w = Math.ceil(bb.width + pad * 2);
-          const h = Math.ceil(bb.height + pad * 2);
-          el.setAttribute('viewBox', `${bb.x - pad} ${bb.y - pad} ${w} ${h}`);
-          el.setAttribute('width', String(w));
-          el.setAttribute('height', String(h));
-          el.style.maxWidth = '100%';
-          el.style.height = 'auto';
-          box.append(el);
-        }
-        probe.remove();
-        pre.replaceWith(box);
-      } catch (e) {
-        // 図にできなかった場合はコードのまま残す
-        console.error('mermaid:', e);
-      }
-    }
-  }
-</script>
+<MermaidDiagrams />

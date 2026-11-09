@@ -1,13 +1,19 @@
 /**
  * Nexus の全体構成図。
  * 上の段のモジュールが下の段のモジュールを使う並びにしている。deps は各モジュールの CMake の依存先。
- * 詳細は src/content/nexus/<id>.md に書き、ブロックはその中の見出しへ飛ぶ。
- * 見出しが見つからないブロックがあるとビルドが止まる。
+ *
+ * 解説は src/content/nexus/ に置く。
+ *   <id>.md         モジュールの概要  → /works/nexus/<id>/
+ *   <id>/<slug>.md  サブシステムの解説 → /works/nexus/<id>/<slug>/
+ * ファイルが欠けているとビルドが止まる。
  */
 export interface MapBlock {
+  /** | は図の中で折り返してよい位置（カタカナ語が途中で切れないようにする） */
   label: string;
-  /** 飛び先の見出し。省略時は label と同じ文字列の見出しへ飛ぶ */
-  heading?: string;
+  /** 省略すると、モジュールの概要へ飛ぶ */
+  slug?: string;
+  /** 作品ページ本文のこの見出しへ飛ぶ */
+  pageHeading?: string;
 }
 
 export interface MapModule {
@@ -21,9 +27,7 @@ export interface MapModule {
   note?: string;
   /** 構成図で強調する */
   accent?: boolean;
-  /** true のブロックは見出しを持たず、詳細の先頭へ飛ぶ */
-  plainBlocks?: boolean;
-  /** 詳細を持たず、作品ページ本文のこの見出しへ飛ぶ */
+  /** 解説を持たず、作品ページ本文のこの見出しへ飛ぶ */
   pageHeading?: string;
   blocks: MapBlock[];
 }
@@ -33,15 +37,28 @@ export interface MapRow {
   modules: MapModule[];
 }
 
-const blocks = (...labels: string[]): MapBlock[] => labels.map((label) => ({ label }));
+const b = (label: string, slug?: string): MapBlock => ({ label, slug });
 
 export const ARCHITECTURE: MapRow[] = [
   {
     title: 'アプリケーション',
     modules: [
-      { id: 'editor', name: 'Editor', label: 'エディタ', span: 3, note: '開発中', blocks: blocks('エディタコア', 'C ABI', 'C# UI') },
-      { id: 'server', name: 'Server', label: '専用サーバ', span: 2, plainBlocks: true, blocks: blocks('ヘッドレス実行') },
-      { id: 'tools', name: 'Tools', label: '開発ツール', span: 3, blocks: blocks('NexusCook', 'JobBench', 'RhiSelfTest') },
+      {
+        id: 'editor',
+        name: 'Editor',
+        label: 'エディタ',
+        span: 3,
+        note: '開発中',
+        blocks: [b('エディタ|コア', 'core'), b('C ABI', 'c-abi'), b('C# UI', 'csharp-ui')],
+      },
+      { id: 'server', name: 'Server', label: '専用サーバ', span: 2, blocks: [b('ヘッドレス|実行')] },
+      {
+        id: 'tools',
+        name: 'Tools',
+        label: '開発ツール',
+        span: 3,
+        blocks: [b('NexusCook', 'nexus-cook'), b('JobBench', 'job-bench'), b('RhiSelfTest', 'rhi-self-test')],
+      },
       {
         id: 'samples',
         name: 'Samples',
@@ -49,8 +66,8 @@ export const ARCHITECTURE: MapRow[] = [
         span: 4,
         pageHeading: 'デモ — エンジンで何が動くか',
         blocks: [
-          { label: 'NexusDefense', heading: 'NexusDefense — フレームレートが体力のタワーディフェンス' },
-          { label: 'NightCrossing', heading: 'NightCrossing — 統合レンダリングデモ' },
+          { label: 'NexusDefense', pageHeading: 'NexusDefense — フレームレートが体力のタワーディフェンス' },
+          { label: 'NightCrossing', pageHeading: 'NightCrossing — 統合レンダリングデモ' },
         ],
       },
     ],
@@ -64,7 +81,14 @@ export const ARCHITECTURE: MapRow[] = [
         label: '実行基盤',
         span: 5,
         deps: ['foundation', 'platform', 'rhi', 'network'],
-        blocks: blocks('ゲームループ', '画面とフロー', 'UI', 'シネマティクス', 'コンソール', 'ローカライズ'),
+        blocks: [
+          b('ゲーム|ループ', 'game-loop'),
+          b('画面と|フロー', 'screen-flow'),
+          b('UI', 'ui'),
+          b('シネマ|ティクス', 'cinematics'),
+          b('コンソール', 'console'),
+          b('ローカライズ', 'localization'),
+        ],
       },
       {
         id: 'resource',
@@ -72,7 +96,13 @@ export const ARCHITECTURE: MapRow[] = [
         label: 'リソース',
         span: 4,
         deps: ['foundation', 'platform', 'renderer', 'animation'],
-        blocks: blocks('アセットデータベース', 'クッカー', '画像パーサ', 'モデルパーサ', 'フォント'),
+        blocks: [
+          b('アセット|データベース', 'asset-database'),
+          b('クッカー', 'cooker'),
+          b('画像|パーサ', 'image-parsers'),
+          b('モデル|パーサ', 'model-parsers'),
+          b('フォント', 'font'),
+        ],
       },
       {
         id: 'scripting',
@@ -81,11 +111,7 @@ export const ARCHITECTURE: MapRow[] = [
         span: 3,
         deps: ['foundation'],
         note: '開発中',
-        blocks: [
-          { label: '.NET', heading: '.NET ホスト' },
-          { label: 'Python', heading: 'Python ホスト' },
-          { label: 'ネイティブ', heading: 'ネイティブモジュール' },
-        ],
+        blocks: [b('.NET', 'dotnet'), b('Python', 'python'), b('ネイティブ', 'native-module')],
       },
     ],
   },
@@ -98,7 +124,16 @@ export const ARCHITECTURE: MapRow[] = [
         label: 'レンダラ',
         span: 10,
         deps: ['foundation', 'rhi'],
-        blocks: blocks('レンダーグラフ', 'メッシュとトゥーン', 'DDGI', 'ハイブリッドレイトレ', 'パストレーシング', 'ポストプロセス', 'パーティクル', 'ボリュームライト'),
+        blocks: [
+          b('レンダー|グラフ', 'render-graph'),
+          b('メッシュと|トゥーン', 'mesh-toon'),
+          b('DDGI', 'ddgi'),
+          b('ハイブリッド|レイトレ', 'hybrid-rt'),
+          b('パス|トレーシング', 'path-tracing'),
+          b('ポスト|プロセス', 'post-process'),
+          b('パーティクル', 'particles'),
+          b('ボリューム|ライト', 'volumetric'),
+        ],
       },
       {
         id: 'imgui',
@@ -106,19 +141,58 @@ export const ARCHITECTURE: MapRow[] = [
         label: 'デバッグ UI',
         span: 2,
         deps: ['foundation', 'platform', 'rhi'],
-        plainBlocks: true,
-        blocks: blocks('バックエンド'),
+        blocks: [b('バック|エンド')],
       },
     ],
   },
   {
     title: 'ゲーム機能',
     modules: [
-      { id: 'network', name: 'Network', label: 'ネットワーク', span: 1, deps: ['foundation', 'scene'], blocks: blocks('トランスポート', 'レプリケーション', '予測', 'セッション') },
-      { id: 'animation', name: 'Animation', label: 'アニメーション', span: 1, deps: ['foundation'], blocks: blocks('ステートマシン', 'IK', 'ポーズブレンド', 'リターゲット') },
-      { id: 'physics', name: 'Physics', label: '物理', span: 1, deps: ['foundation'], blocks: blocks('2D 物理', '3D 物理', 'キャラクター', 'Verlet') },
-      { id: 'audio', name: 'Audio', label: 'オーディオ', span: 1, deps: ['foundation'], blocks: blocks('ミキサと DSP', '3D 音響', 'ストリーミング', 'WASAPI 出力') },
-      { id: 'ai', name: 'AI', label: 'AI', span: 1, deps: ['foundation'], blocks: blocks('経路探索', '行動決定', 'ステアリング', '知覚') },
+      {
+        id: 'network',
+        name: 'Network',
+        label: 'ネットワーク',
+        span: 1,
+        deps: ['foundation', 'scene'],
+        blocks: [
+          b('トランス|ポート', 'transport'),
+          b('レプリ|ケーション', 'replication'),
+          b('予測', 'prediction'),
+          b('セッション', 'session'),
+        ],
+      },
+      {
+        id: 'animation',
+        name: 'Animation',
+        label: 'アニメーション',
+        span: 1,
+        deps: ['foundation'],
+        blocks: [b('ステート|マシン', 'state-machine'), b('IK', 'ik'), b('ポーズ|ブレンド', 'pose-blend'), b('リター|ゲット', 'retarget')],
+      },
+      {
+        id: 'physics',
+        name: 'Physics',
+        label: '物理',
+        span: 1,
+        deps: ['foundation'],
+        blocks: [b('2D 物理', 'physics-2d'), b('3D 物理', 'physics-3d'), b('キャラ|クター', 'character'), b('Verlet', 'verlet')],
+      },
+      {
+        id: 'audio',
+        name: 'Audio',
+        label: 'オーディオ',
+        span: 1,
+        deps: ['foundation'],
+        blocks: [b('ミキサと|DSP', 'mixer-dsp'), b('3D 音響', 'spatial'), b('ストリー|ミング', 'streaming'), b('WASAPI|出力', 'wasapi')],
+      },
+      {
+        id: 'ai',
+        name: 'AI',
+        label: 'AI',
+        span: 1,
+        deps: ['foundation'],
+        blocks: [b('経路探索', 'pathfinding'), b('行動決定', 'decision'), b('ステア|リング', 'steering'), b('知覚', 'perception')],
+      },
     ],
   },
   {
@@ -131,12 +205,7 @@ export const ARCHITECTURE: MapRow[] = [
         span: 1,
         deps: ['foundation'],
         accent: true,
-        blocks: [
-          { label: '並列ECS', heading: '並列ECS — 衝突をコードに宣言させる' },
-          { label: 'スケジューラ', heading: '採った方法' },
-          { label: '空間構造' },
-          { label: 'シリアライズ' },
-        ],
+        blocks: [b('並列ECS', 'ecs'), b('スケジューラ', 'scheduler'), b('空間構造', 'spatial'), b('シリアライズ', 'serialization')],
       },
       {
         id: 'rhi',
@@ -145,12 +214,7 @@ export const ARCHITECTURE: MapRow[] = [
         span: 1,
         deps: ['foundation', 'platform'],
         accent: true,
-        blocks: [
-          { label: '薄い抽象化', heading: '抽象化の粒度を「薄く」に決めた' },
-          { label: 'DirectX 12 / Vulkan', heading: '実装順は Vulkan から' },
-          { label: 'HLSL シェーダ', heading: 'シェーダは HLSL に統一' },
-          { label: 'CI での実描画' },
-        ],
+        blocks: [b('薄い抽象化', 'thin-abstraction'), b('DirectX 12 / Vulkan', 'dual-backend'), b('HLSL|シェーダ', 'hlsl'), b('CI での|実描画', 'ci-rendering')],
       },
     ],
   },
@@ -163,7 +227,7 @@ export const ARCHITECTURE: MapRow[] = [
         label: 'プラットフォーム',
         span: 1,
         deps: ['foundation'],
-        blocks: blocks('ウィンドウ', '入力', 'ファイルシステム', 'クラッシュダンプ'),
+        blocks: [b('ウィンドウ', 'window'), b('入力', 'input'), b('ファイル|システム', 'filesystem'), b('クラッシュ|ダンプ', 'crash-dump')],
       },
     ],
   },
@@ -175,7 +239,14 @@ export const ARCHITECTURE: MapRow[] = [
         name: 'Foundation',
         label: '基盤ライブラリ',
         span: 1,
-        blocks: blocks('メモリアロケータ', 'ジョブシステム', '数学・コンテナ', 'リフレクション', 'プロファイラ', '設定（CVar）'),
+        blocks: [
+          b('メモリ|アロケータ', 'allocators'),
+          b('ジョブ|システム', 'job-system'),
+          b('数学・|コンテナ', 'math-containers'),
+          b('リフレク|ション', 'reflection'),
+          b('プロファイラ', 'profiler'),
+          b('設定（CVar）', 'cvar'),
+        ],
       },
     ],
   },
@@ -187,8 +258,7 @@ export const ARCHITECTURE: MapRow[] = [
         name: 'OS / SDK',
         label: '自作しないもの',
         span: 1,
-        plainBlocks: true,
-        blocks: blocks('Win32', 'Direct3D 12', 'Vulkan', 'DXC', 'WASAPI', 'Dear ImGui', '.NET', 'Python', 'DLSS / FSR'),
+        blocks: ['Win32', 'Direct3D 12', 'Vulkan', 'DXC', 'WASAPI', 'Dear ImGui', '.NET', 'Python', 'DLSS / FSR'].map((l) => b(l)),
       },
     ],
   },
@@ -196,3 +266,13 @@ export const ARCHITECTURE: MapRow[] = [
 
 export const MODULES: MapModule[] = ARCHITECTURE.flatMap((row) => row.modules);
 export const moduleById = (id: string) => MODULES.find((m) => m.id === id);
+
+/** 図の折り返し位置を外した表示名 */
+export const plainLabel = (label: string) => label.replaceAll('|', '');
+/** 図のラベル。ゼロ幅スペースを折り返し位置にする */
+export const mapLabel = (label: string) => label.replaceAll('|', '​');
+
+export const moduleHref = (id: string) => `/works/nexus/${id}/`;
+export const subsystemHref = (id: string, slug: string) => `/works/nexus/${id}/${slug}/`;
+/** 解説ページを持つモジュール */
+export const DOC_MODULES = MODULES.filter((m) => !m.pageHeading);

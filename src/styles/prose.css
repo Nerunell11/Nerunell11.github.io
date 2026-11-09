@@ -1,0 +1,255 @@
+/* 作品ページと Nexus の解説ページで共有する本文の文字組み */
+/* ---------- 本文 ---------- */
+.prose {
+  max-width: 72ch;
+  color: var(--text-dim);
+  font-size: 1rem;
+  line-height: 2;
+}
+
+.prose h2 {
+  font-family: var(--f-display);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--text);
+  margin: 0;
+}
+
+.prose h3 {
+  font-family: var(--f-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+/* ---------- 見出しごとの開閉（details / summary） ---------- */
+.prose .sec-2 {
+  margin-top: 2.4em;
+  padding-top: 1.2em;
+  border-top: 1px solid var(--line);
+}
+
+.prose .sec-2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.prose .sec-3 {
+  margin-top: 1.8em;
+}
+
+.prose .sec > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.prose .sec > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* 右端の開閉ボタン。開いているときは下向き、閉じているときは右向き */
+.prose .sec > summary::after {
+  content: '';
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background:
+    no-repeat center / 10px 10px
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 3.5 5 7l3.5-3.5' fill='none' stroke='%23ff6b2c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  transition:
+    transform 0.25s var(--ease),
+    border-color 0.25s var(--ease);
+}
+
+.prose .sec:not([open]) > summary::after {
+  transform: rotate(-90deg);
+}
+
+.prose .sec-3 > summary::after {
+  width: 24px;
+  height: 24px;
+}
+
+.prose .sec > summary:hover::after {
+  border-color: var(--accent);
+}
+
+.prose .sec > summary:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.prose .sec-2 > .sec-body {
+  padding-top: 0.8em;
+}
+
+.prose .sec-3 > .sec-body {
+  padding-top: 0.6em;
+}
+
+/* 節の先頭の要素は、見出しとの間を詰めすぎないよう上の余白を消す */
+.prose .sec-body > :first-child {
+  margin-top: 0;
+}
+
+/* h3 の下の小見出し。アクセントの縦線で階層を示す。 */
+.prose h4 {
+  font-family: var(--f-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 1.8em 0 0.6em;
+  padding-left: 12px;
+  border-left: 2px solid var(--accent);
+}
+
+.prose p {
+  margin: 1.2em 0;
+}
+
+.prose ul,
+.prose ol {
+  margin: 1.2em 0;
+  padding-left: 1.4em;
+  list-style: disc;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose li {
+  margin: 0.4em 0;
+}
+
+.prose li::marker {
+  color: var(--accent);
+}
+
+.prose a {
+  color: var(--accent-hi);
+  border-bottom: 1px solid var(--accent-line);
+}
+
+.prose a:hover {
+  color: var(--accent);
+}
+
+.prose strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.prose video {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 2em 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-sink);
+}
+
+/* 小さい画像を引き伸ばさない。コードのスクリーンショットがぼやけるため。 */
+.prose img {
+  max-width: 100%;
+  height: auto;
+  margin: 2em 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.prose blockquote {
+  margin: 1.6em 0;
+  padding: 4px 0 4px 22px;
+  border-left: 2px solid var(--accent);
+  color: var(--text-dim);
+}
+
+.prose code {
+  font-family: var(--f-mono);
+  font-size: 0.86em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--surface-hi);
+  color: var(--accent-hi);
+}
+
+.prose pre {
+  margin: 1.8em 0;
+  padding: 20px 22px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-sink) !important;
+  line-height: 1.7;
+}
+
+.prose pre code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: 0.84rem;
+}
+
+/* 狭い画面では表だけを横スクロールさせる（ページ全体をはみ出させない） */
+.prose table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  margin: 1.8em 0;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.prose th,
+.prose td {
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.prose th {
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--f-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.prose .diagram {
+  margin: 2em 0;
+  padding: 20px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-sink);
+}
+
+/* 枠より大きい図は枠の幅まで縮める（小さい図は実寸のまま）。
+   縮めすぎると文字が読めなくなるので、図そのものを横に広げすぎないように描く */
+.prose .diagram svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* ---------- 図版・数式 ---------- */
+.prose figure { margin: 2em 0; }
+.prose figure img, .prose figure video { margin: 0; }
+.prose figcaption { margin-top: 0.7em; font-size: 0.82rem; line-height: 1.7; color: var(--text-faint); }
+.prose .katex-display { margin: 1.6em 0; padding: 14px 12px; overflow-x: auto; overflow-y: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-sink); }
+.prose .katex { color: var(--text); font-size: 1.05em; }

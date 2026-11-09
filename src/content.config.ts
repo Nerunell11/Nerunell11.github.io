@@ -47,11 +47,11 @@ const works = defineCollection({
 });
 
 /**
- * Nexus の全体構成図から開く詳細。ファイル名は src/data/nexus-architecture.ts の id と揃える。
+ * Nexus の解説。<module>.md が概要、<module>/<slug>.md がサブシステムで、src/data/nexus-architecture.ts と揃える。
  * 見出しは ### から書く（## を使うと開閉式の節に包まれてしまう）。
  */
 const nexus = defineCollection({
-  loader: glob({ base: './src/content/nexus', pattern: '*.md' }),
+  loader: glob({ base: './src/content/nexus', pattern: '**/*.md' }),
   schema: z.object({}),
 });
 

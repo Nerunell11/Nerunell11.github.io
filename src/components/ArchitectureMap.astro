@@ -1,5 +1,5 @@
 ---
-import { ARCHITECTURE, type MapBlock, type MapModule } from '../data/nexus-architecture';
+import { ARCHITECTURE, mapLabel, moduleHref, subsystemHref, type MapBlock, type MapModule } from '../data/nexus-architecture';
 
 interface Heading {
   slug: string;
@@ -7,48 +7,30 @@ interface Heading {
 }
 
 interface Props {
-  /** 詳細パネルごとの見出し */
-  panels: { id: string; headings: Heading[] }[];
   /** 作品ページ本文の見出し。デモのブロックの飛び先に使う */
   pageHeadings: Heading[];
 }
 
-const { panels, pageHeadings } = Astro.props;
+const { pageHeadings } = Astro.props;
 
-const slugOf = (headings: Heading[], text: string, where: string) => {
-  const found = headings.find((h) => h.text === text);
-  if (!found) throw new Error(`構成図: ${where} に見出し「${text}」がありません`);
-  return found.slug;
+const pageAnchor = (text: string) => {
+  const found = pageHeadings.find((h) => h.text === text);
+  if (!found) throw new Error(`構成図: nexus.md に見出し「${text}」がありません`);
+  return `#${found.slug}`;
 };
 
-const hrefOf = (mod: MapModule, block: MapBlock) => {
-  const text = block.heading ?? block.label;
-  if (mod.pageHeading) return `#${slugOf(pageHeadings, text, 'nexus.md')}`;
-  if (mod.plainBlocks) return `#sys-${mod.id}`;
-  const panel = panels.find((p) => p.id === mod.id);
-  if (!panel) throw new Error(`構成図: src/content/nexus/${mod.id}.md がありません`);
-  return `#${slugOf(panel.headings, text, `${mod.id}.md`)}`;
+const headHref = (mod: MapModule) => (mod.pageHeading ? pageAnchor(mod.pageHeading) : moduleHref(mod.id));
+
+const blockHref = (mod: MapModule, block: MapBlock) => {
+  if (block.pageHeading) return pageAnchor(block.pageHeading);
+  return block.slug ? subsystemHref(mod.id, block.slug) : moduleHref(mod.id);
 };
-
-const headHref = (mod: MapModule) =>
-  mod.pageHeading ? `#${slugOf(pageHeadings, mod.pageHeading, 'nexus.md')}` : `#sys-${mod.id}`;
-
-// 別々に描画する Markdown の間で id が重なると、違う節へ飛んでしまう
-const seen = new Set(pageHeadings.map((h) => h.slug));
-for (const panel of panels) {
-  for (const h of panel.headings) {
-    if (seen.has(h.slug)) throw new Error(`構成図: 見出しの id が重複しています: ${h.slug} (${panel.id}.md)`);
-    seen.add(h.slug);
-  }
-}
 ---
 
-<section class="map" aria-labelledby="map-title">
+<section class="map" id="architecture" aria-labelledby="map-title">
   <header class="map-head">
     <h2 id="map-title" class="map-title">全体構成</h2>
-    <p class="map-hint">
-      ブロックをクリックすると、その部分の設計と実装を読めます。上の段が下の段を使い、カーソルを合わせると直接の依存先が光ります。
-    </p>
+    <p class="map-hint">ブロックをクリックすると、そのサブシステムの解説を開きます。上の段が下の段を使います。</p>
   </header>
 
   <div class="map-body" data-map>
@@ -72,8 +54,8 @@ for (const panel of panels) {
                 <ul class="mod-blocks" data-n={mod.blocks.length}>
                   {mod.blocks.map((block) => (
                     <li>
-                      <a class="block" href={hrefOf(mod, block)}>
-                        {block.label}
+                      <a class="block" href={blockHref(mod, block)}>
+                        {mapLabel(block.label)}
                       </a>
                     </li>
                   ))}
@@ -86,35 +68,10 @@ for (const panel of panels) {
     }
   </div>
 
-  <dialog class="sys-dialog" aria-label="モジュールの詳細" data-dialog>
-    <div class="sys-bar">
-      <button class="sys-close" type="button" data-close>
-        <span aria-hidden="true">←</span> 構成図に戻る
-      </button>
-    </div>
-    <div class="sys-scroll" data-scroll>
-      <slot />
-    </div>
-  </dialog>
-
-  <!-- JavaScript なしでは、すべての詳細を構成図の下に並べる -->
-  <noscript>
-    <style>
-      .sys-dialog {
-        display: block;
-        position: static;
-        width: 100%;
-        height: auto;
-        transform: none;
-      }
-      .sys-bar {
-        display: none;
-      }
-      .sys-panel[hidden] {
-        display: block;
-      }
-    </style>
-  </noscript>
+  <ul class="map-legend" aria-label="ハイライトの見方">
+    <li><span class="swatch swatch-source" aria-hidden="true"></span>カーソルを合わせたモジュール</li>
+    <li><span class="swatch swatch-dep" aria-hidden="true"></span>それが直接使っているモジュール（CMake の依存先）</li>
+  </ul>
 </section>
 
 <style>
@@ -167,7 +124,7 @@ for (const panel of panels) {
 
   .mod {
     flex: var(--span) 1 0;
-    min-width: min(100%, 210px);
+    min-width: min(100%, 190px);
     display: flex;
     flex-direction: column;
     container-type: inline-size;
@@ -200,6 +157,44 @@ for (const panel of panels) {
 
   .map-body.is-tracing .mod.is-dep {
     border-color: var(--hot-hi);
+  }
+
+  .map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin-top: 12px;
+    font-size: 0.78rem;
+    color: var(--text-faint);
+  }
+
+  .map-legend li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .swatch {
+    flex: none;
+    width: 14px;
+    height: 10px;
+    border: 1px solid;
+    border-radius: 2px;
+  }
+
+  .swatch-source {
+    border-color: var(--accent);
+  }
+
+  .swatch-dep {
+    border-color: var(--hot-hi);
+  }
+
+  /* タッチ操作ではカーソルを合わせられないので、凡例を出さない */
+  @media (hover: none) {
+    .map-legend {
+      display: none;
+    }
   }
 
   .mod-head {
@@ -301,6 +296,10 @@ for (const panel of panels) {
     font-size: 0.78rem;
     line-height: 1.4;
     text-align: center;
+    /* 語の途中では折り返さず、ラベルに入れたゼロ幅スペースの位置で折り返す。
+       それでも入らないときだけ、はみ出す代わりに文字の間で折る */
+    word-break: keep-all;
+    overflow-wrap: anywhere;
     color: var(--text-dim);
     transition:
       color 0.2s var(--ease),
@@ -315,165 +314,12 @@ for (const panel of panels) {
   }
 
   .mod-head:focus-visible,
-  .block:focus-visible,
-  .sys-close:focus-visible {
+  .block:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 1px;
   }
 
-  /* ---------- 詳細（右から開くパネル） ---------- */
-  .sys-dialog {
-    width: min(780px, 100vw);
-    max-width: none;
-    height: 100dvh;
-    max-height: none;
-    margin: 0 0 0 auto;
-    padding: 0;
-    border: none;
-    border-left: 1px solid var(--line-hi);
-    background: var(--bg-raise);
-    color: var(--text-dim);
-  }
-
-  .sys-dialog[open] {
-    display: flex;
-    flex-direction: column;
-    animation: sys-in 0.28s var(--ease);
-  }
-
-  /* 開いている間は後ろのページを動かさない */
-  :global(html:has(.sys-dialog[open])) {
-    overflow: hidden;
-  }
-
-  .sys-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.62);
-  }
-
-  @keyframes sys-in {
-    from {
-      transform: translateX(32px);
-      opacity: 0;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .sys-dialog[open] {
-      animation: none;
-    }
-  }
-
-  .sys-bar {
-    flex: none;
-    padding: 12px clamp(20px, 4vw, 40px);
-    border-bottom: 1px solid var(--line);
-  }
-
-  .sys-close {
-    padding: 6px 0;
-    font-size: 0.86rem;
-    color: var(--accent-hi);
-    cursor: pointer;
-    background: none;
-    border: none;
-  }
-
-  .sys-close:hover {
-    color: var(--accent);
-  }
-
-  .sys-scroll {
-    flex: 1;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding: clamp(24px, 4vw, 40px) clamp(20px, 4vw, 40px) 64px;
-    /* ここは smooth にしない。開いた直後に目的の節まで一度に移動させる */
-    scroll-behavior: auto;
-  }
-
-  /* 中身の Markdown は作品ページ側で描画するので :global で当てる */
-  .sys-dialog :global(.sys-head) {
-    margin-bottom: 28px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .sys-dialog :global(.sys-name) {
-    font-family: var(--f-mono);
-    font-size: 0.74rem;
-    letter-spacing: 0.08em;
-    color: var(--text-faint);
-  }
-
-  .sys-dialog :global(.sys-title) {
-    margin: 2px 0 0;
-    padding: 0;
-    border: none;
-    font-family: var(--f-display);
-    font-size: clamp(1.4rem, 3vw, 1.9rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.3;
-    color: var(--text);
-  }
-
-  .sys-dialog :global(.sys-deps) {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    margin: 12px 0 0;
-    font-size: 0.78rem;
-    color: var(--text-faint);
-  }
-
-  .sys-dialog :global(.sys-deps a) {
-    padding: 1px 8px;
-    border: 1px solid var(--line-hi);
-    border-radius: 3px;
-    font-family: var(--f-mono);
-    font-size: 0.72rem;
-    color: var(--accent-hi);
-  }
-
-  .sys-dialog :global(.sys-deps a:hover) {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  .sys-dialog :global(.sys-panel h3) {
-    margin: 2.2em 0 0.6em;
-    scroll-margin-top: 16px;
-  }
-
-  .sys-dialog :global(.sys-panel h4) {
-    scroll-margin-top: 16px;
-  }
-
-  /* 開いた節の見出しを一瞬示す */
-  .sys-dialog :global(.is-target) {
-    animation: sys-target 1.6s var(--ease);
-  }
-
-  @keyframes sys-target {
-    0%,
-    40% {
-      color: var(--accent-hi);
-      text-shadow: 0 0 14px var(--accent-line);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .sys-dialog :global(.is-target) {
-      animation: none;
-    }
-  }
-
   @media (max-width: 560px) {
-    .sys-dialog {
-      border-left: none;
-    }
-
     .mod {
       flex-basis: 100%;
     }
@@ -481,93 +327,18 @@ for (const panel of panels) {
 </style>
 
 <script>
-  const dialog = document.querySelector<HTMLDialogElement>('[data-dialog]');
   const map = document.querySelector<HTMLElement>('[data-map]');
 
-  if (dialog && map) {
-    const scroller = dialog.querySelector<HTMLElement>('[data-scroll]')!;
-    const panels = Array.from(dialog.querySelectorAll<HTMLElement>('.sys-panel'));
-    // このページ内で履歴に積んだ開き方かどうか。閉じるときに戻るか書き換えるかを決める
-    let pushed = false;
-
-    const targetOf = (hash: string) => {
-      if (hash.length < 2) return null;
-      return document.getElementById(decodeURIComponent(hash.slice(1)));
-    };
-
-    const show = (target: HTMLElement) => {
-      const panel = target.closest<HTMLElement>('.sys-panel')!;
-      for (const p of panels) p.hidden = p !== panel;
-      if (!dialog.open) dialog.showModal();
-
-      if (target === panel) {
-        scroller.scrollTop = 0;
-        return;
-      }
-      target.scrollIntoView({ block: 'start' });
-      target.classList.remove('is-target');
-      // 同じ見出しをもう一度開いたときも光らせるため、次のフレームで付け直す
-      requestAnimationFrame(() => target.classList.add('is-target'));
-    };
-
-    // URL の # に合わせて開閉する。戻る・進むと直接リンクもここを通る
-    const sync = () => {
-      const target = targetOf(location.hash);
-      if (target && dialog.contains(target)) show(target);
-      else if (dialog.open) dialog.close();
-    };
-
-    const navigate = (e: MouseEvent, a: HTMLAnchorElement) => {
-      const target = targetOf(a.hash);
-      if (!target) return;
-
-      // 詳細を持たないブロック（デモ）は本文へ飛ぶ。閉じた節の中なら先に開く
-      if (!dialog.contains(target)) {
-        if (dialog.open) dialog.close();
-        for (let p = target.parentElement; p; p = p.parentElement) {
-          if (p instanceof HTMLDetailsElement) p.open = true;
-        }
-        return;
-      }
-
-      e.preventDefault();
-      history.pushState(null, '', a.hash);
-      pushed = true;
-      show(target);
-    };
-
-    const onClick = (e: MouseEvent) => {
-      if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+  if (map) {
+    // デモのブロックは本文へ飛ぶ。閉じた節の中なら先に開く
+    map.addEventListener('click', (e) => {
       const a = (e.target as Element).closest<HTMLAnchorElement>('a[href^="#"]');
-      if (a) navigate(e, a);
-    };
-    map.addEventListener('click', onClick);
-    dialog.addEventListener('click', (e) => {
-      // 背景（パネルの外）のクリックで閉じる
-      if (e.target === dialog) {
-        const r = dialog.getBoundingClientRect();
-        if (e.clientX < r.left) dialog.close();
-        return;
-      }
-      onClick(e);
-    });
-
-    dialog.querySelector('[data-close]')!.addEventListener('click', () => dialog.close());
-
-    // Esc・ボタン・背景のどれで閉じても URL から # を外す
-    dialog.addEventListener('close', () => {
-      const target = targetOf(location.hash);
-      if (!target || !dialog.contains(target)) return;
-      if (pushed) {
-        pushed = false;
-        history.back();
-      } else {
-        history.replaceState(null, '', location.pathname + location.search);
+      if (!a) return;
+      const target = document.getElementById(decodeURIComponent(a.hash.slice(1)));
+      for (let p = target?.parentElement; p; p = p.parentElement) {
+        if (p instanceof HTMLDetailsElement) p.open = true;
       }
     });
-
-    window.addEventListener('popstate', sync);
-    sync();
 
     // 依存先の強調
     const mods = Array.from(map.querySelectorAll<HTMLElement>('[data-mod]'));
