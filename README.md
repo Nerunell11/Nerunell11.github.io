@@ -85,6 +85,7 @@ links:
 | About の本文 | `src/data/site.ts` の `ABOUT` |
 | About 右側の項目（所属など） | `src/data/site.ts` の `FACTS` |
 | スキル一覧 | `src/data/skills.ts` |
+| Nexus の全体構成図 | ブロックは `src/data/nexus-architecture.ts`、詳細は `src/content/nexus/<id>.md` |
 
 ## 配色・フォントを変える
 
