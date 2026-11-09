@@ -15,148 +15,13 @@ links: []
 
 ## 概要
 
-高いパフォーマンスと高品質なグラフィックスの両立を目指して、C++20 でフルスクラッチ開発しているゲームエンジンです。Windows と Linux をターゲットにしています。
+高いパフォーマンスと高品質なグラフィックスの両立を目指して、C++20 でフルスクラッチ開発しているゲームエンジンです。Windows をターゲットにしています。
 
 OS とツールチェーン相当のもの以外は、原則として外部ライブラリに頼らず自作しています。数学・コンテナ・アロケータから、PNG / JPEG / EXR / FBX / glTF のパーサ、ネットワーク層までが対象です。
 
 設計上の制約として、**例外と RTTI を使いません**。エラーは `Result<T>` とアサートで扱い、`new` / `delete` を直接書かずアロケータ経由で確保します。
 
 ゲームロジックは C++ に加えて **C# でも書けるようにする**計画です。.NET ランタイム（CoreCLR）を読み込むホスト層を自作し、現在はエンジンから C# の関数を呼び出せる段階まで来ています。
-
-
-エンジン全体の構成です。矢印は「使う側 → 使われる側」で、各モジュールの CMake の依存関係に沿っています。基盤（Foundation）はほかのすべてのモジュールが使う土台なので、そこへ向かう矢印は Platform からの1本だけにしています。
-
-```mermaid
-flowchart TD
-    Apps["アプリケーション<br/>Editor・Samples・Server"]
-    Resource["リソース<br/>Resource"]
-    Runtime["実行基盤<br/>Runtime"]
-    Scene["シーン（並列ECS）<br/>Scene"]
-    Renderer["レンダラ<br/>Renderer"]
-    Features["ゲーム機能<br/>Physics・Audio・AI<br/>Animation・Network"]
-    RHI["描画APIの抽象化<br/>RHI（DX12・Vulkan）"]
-    Platform["OSの抽象化<br/>Platform"]
-    Foundation["基盤（全モジュールが使う）<br/>Foundation"]
-    Apps --> Resource
-    Apps --> Features
-    Apps --> Runtime
-    Apps --> Scene
-    Resource --> Renderer
-    Resource --> Features
-    Runtime --> Features
-    Runtime --> RHI
-    Renderer --> RHI
-    RHI --> Platform
-    Platform --> Foundation
-```
-
-## 並列ECS — 衝突をコードに宣言させる
-
-### 解きたかった問題
-
-ECS のストレージはアーキタイプ方式で並列化に向いた形でしたが、走査が1エンティティ単位しかなく、仕事をジョブに切り出す単位がありませんでした。
-
-素朴に「システムを全部ジョブに投げる」と、同じコンポーネントを触るシステム同士がデータ競合します。そして**競合の有無を人間が管理する方式は、システムが増えたときに必ず破綻します**。
-
-さらにオンライン対戦のために決定論シミュレーションが必要で、並列化しても実行ごとに結果が変わってはいけないという条件がありました。スレッドの実行順が結果に漏れる余地を、設計で塞ぐ必要があります。
-
-### 採った方法
-
-システムが触るコンポーネントを、型で宣言させることにしました。
-
-NexusDefense で実際に登録しているコードです。
-
-```cpp
-// Samples/TowerDefense/Core/TdSystems.cpp
-scheduler.Add<nx::Reads<TdPosition, TdEnemyStats, TdLagState>,
-              nx::Writes<TdVelocity>>(
-    "TD/EnemyAI", &EnemyAiSystem, &context);
-scheduler.Add<nx::Reads<TdVelocity>, nx::Writes<TdPosition>>(
-    "TD/Movement", &MovementSystem, &context);
-```
-
-アクセス集合はビットセットで保持し、2つのシステムが衝突するのは次のいずれかの場合です。
-
-- `A.writes ∩ B.writes ≠ ∅`
-- `A.writes ∩ B.reads ≠ ∅`
-- `A.reads ∩ B.writes ≠ ∅`
-
-読み取り同士は衝突しません。判定に**集合の等値性しか使わない**ので、型IDの値が実行ごとに変わっても結果は変わりません。
-
-そのうえで、ウェーブ（段）への割り当てを登録順だけで決めます。
-
-- 衝突するシステム同士は、必ず登録順どおりに実行される
-- 同じウェーブのシステムは互いに衝突しないので、実行順に関係なく結果が同じ
-
-この2つから、**並列実行の結果は登録順の直列実行と一致します**。デバッグ用の直列実行パスを用意し、両者が一致することをテストで突き合わせています。
-
-ただしこれが成り立つのは、**システムが宣言したコンポーネントだけを読み書きする**場合です。宣言していないグローバル状態や外部 I/O、システム間で共有する乱数に触れると、スケジューラはその競合を検出できません。そこは保証の外で、システムを書く側が守る制約にしています。
-
-エンティティの生成・破棄といった構造変更は、システムごとのコマンドバッファに積み、ウェーブの境界で呼び出しスレッドが登録順に適用します。どのシステムが先に終わったかは、適用順に影響しません。
-
-主要なクラスの関係です。
-
-```mermaid
-classDiagram
-direction TB
-class SystemScheduler
-class SystemContext
-class JobSystem
-class World
-class EntityCommandBuffer
-class Archetype
-class Chunk
-SystemScheduler --> SystemContext : 実行ごとに生成
-SystemScheduler --> JobSystem : ジョブを投入
-SystemContext --> JobSystem : チャンクを分配
-SystemContext --> World : 読み書き
-SystemContext --> EntityCommandBuffer : 構造変更を積む
-SystemScheduler *-- EntityCommandBuffer : システムごとに1つ
-World *-- Archetype : 保持
-Archetype *-- Chunk : 所有
-```
-
-1フレームの実行の流れです。
-
-```mermaid
-flowchart TD
-    A["アクセス集合から<br/>ウェーブを決める"] --> B["同じウェーブのシステムを<br/>ジョブとして並列実行"]
-    B --> C["全ジョブの完了を待つ"]
-    C --> D["コマンドバッファを<br/>登録順に適用"]
-    D --> E{"次のウェーブがある？"}
-    E -->|"ある"| B
-    E -->|"ない"| F["フレーム完了"]
-```
-
-## デュアルRHI — DirectX 12 と Vulkan を同じAPIで
-
-### 抽象化の粒度を「薄く」に決めた
-
-DirectX 12 と Vulkan は、コマンドバッファ・明示的同期・ディスクリプタ管理という点で世代が揃っているため、共通の抽象を置けます。
-
-方針として **RHI 自体は賢くしない**ことに決めました。Device / Queue / CommandList / Pipeline / DescriptorSet / Resource / Barrier を両APIとほぼ1対1で表現するに留め、バリアやディスクリプタの自動化は上位のレンダグラフ層に任せます。
-
-抽象インターフェースと、各バックエンドの実装の関係です。
-
-```mermaid
-classDiagram
-    direction TB
-    IDevice <|-- D3D12Device
-    IDevice <|-- VulkanDevice
-    IDevice --> ICommandList : フレームごとに提供
-    ICommandList <|-- D3D12CommandList
-    ICommandList <|-- VulkanCommandList
-```
-
-厚い抽象（OpenGL 風に隠蔽する形）は採りませんでした。Nexus は明示的APIの性能を引き出すことを目標にしているので、バリアやメモリ配置を RHI の中で隠すと、上位層から最適化する手段がなくなるためです。DX11 / OpenGL 世代まで対応する案も、抽象化の最小公倍数が古い世代に引きずられるため却下しています。
-
-### シェーダは HLSL に統一
-
-シェーダは HLSL で統一して書き、DXC で DXIL（DX12用）と SPIR-V（Vulkan用）の両方へオフラインコンパイルします。シェーダコンパイラだけは、自作が非現実的なためフルスクラッチ方針の例外としています。
-
-### 実装順は Vulkan から
-
-機能追加は「Vulkan 実装 → DX12 実装 → 共通テスト」の順で進めています。Nexus の RHI の範囲では、レイアウト遷移や同期の書き方は **Vulkan のほうが要求が細かいので、Vulkan で通した設計を DX12 へ移すほうが手戻りが少ない**と判断したためです。逆順だと、DX12 で通る緩い設計を Vulkan 側で作り直すことになります。
 
 ## デモ — エンジンで何が動くか
 
@@ -213,6 +78,6 @@ ECS の性能を見せるためのデモです。**フレームレートその�
 
 ## 設計の記録
 
-主要な設計判断は ADR（Architecture Decision Record）として、文脈・決定・却下した代替案まで含めて記録しています。現在35本あります。
+主要な設計判断は ADR（Architecture Decision Record）として、文脈・決定・却下した代替案まで含めて記録しています。現在37本あります。
 
-テストは自作のテストランナーで各モジュールに同梱し、1,409個のユニットテストが動いています。
+テストは自作のテストランナーで各モジュールに同梱し、1,461個のユニットテストが動いています。

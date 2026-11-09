@@ -1,6 +1,8 @@
 ---
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import ArchitectureMap from '../../components/ArchitectureMap.astro';
+import { moduleById } from '../../data/nexus-architecture';
 
 export async function getStaticPaths() {
   const works = (
@@ -28,6 +30,19 @@ const { Content, headings } = await render(work);
 const d = work.data;
 // 目次には h2 と h3 だけを出す（h4 まで出すと長くなりすぎる）
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+// Nexus だけ、全体構成図とそこから開く詳細を出す
+const archPanels =
+  work.id === 'nexus'
+    ? await Promise.all(
+        (await getCollection('nexus')).map(async (entry) => {
+          const { Content: PanelContent, headings: panelHeadings } = await render(entry);
+          const mod = moduleById(entry.id);
+          if (!mod) throw new Error(`構成図: ${entry.id}.md に対応するモジュールがありません`);
+          return { id: entry.id, mod, PanelContent, headings: panelHeadings };
+        })
+      )
+    : [];
 ---
 
 <Base title={d.title} description={d.summary} padTop>
@@ -63,6 +78,36 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
       d.cover && (
         <div class="wrap cover">
           <img src={d.cover} alt={`${d.title} のスクリーンショット`} />
+        </div>
+      )
+    }
+
+    {
+      archPanels.length > 0 && (
+        <div class="wrap">
+          <ArchitectureMap
+            panels={archPanels.map((p) => ({ id: p.id, headings: p.headings }))}
+            pageHeadings={headings}
+          >
+            {/* .prose の文字組みを当てるため、詳細はこのページのテンプレートで描画する */}
+            {archPanels.map(({ id, mod, PanelContent }) => (
+              <section class="prose sys-panel" id={`sys-${id}`} hidden>
+                <header class="sys-head">
+                  <p class="sys-name">{mod.name}</p>
+                  <h2 class="sys-title">{mod.label}</h2>
+                  {mod.deps && mod.deps.length > 0 && (
+                    <p class="sys-deps">
+                      依存先
+                      {mod.deps.map((dep) => (
+                        <a href={`#sys-${dep}`}>{moduleById(dep)?.name}</a>
+                      ))}
+                    </p>
+                  )}
+                </header>
+                <PanelContent />
+              </section>
+            ))}
+          </ArchitectureMap>
         </div>
       )
     }
