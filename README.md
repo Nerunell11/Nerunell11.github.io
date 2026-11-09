@@ -85,7 +85,94 @@ links:
 | About の本文 | `src/data/site.ts` の `ABOUT` |
 | About 右側の項目（所属など） | `src/data/site.ts` の `FACTS` |
 | スキル一覧 | `src/data/skills.ts` |
-| Nexus の全体構成図 | ブロックは `src/data/nexus-architecture.ts`、詳細は `src/content/nexus/<id>.md` |
+| Nexus の全体構成図と解説 | 構成図は `src/data/nexus-architecture.ts`、解説は `src/content/nexus/<id>.md`（概要）と `src/content/nexus/<id>/<slug>.md`（サブシステム）。数式は ```` ```math ```` と `` `$x# ポートフォリオサイト
+
+`https://nerunell11.github.io/` のソースです。Astro で作った静的サイトで、`main` に push すると GitHub Actions がビルドして自動で公開します。
+
+## ファイル構成
+
+```
+src/
+├─ content/works/        作品 ← 1ファイル = 1作品。増やすのはここ
+├─ data/
+│  ├─ site.ts            名前・肩書き・About本文・GitHubリンク
+│  └─ skills.ts          スキル一覧
+├─ pages/
+│  ├─ index.astro        トップ（Hero / About / Works / Skills / Contact）
+│  └─ works/[...slug].astro  作品詳細ページ（自動生成）
+├─ components/
+│  ├─ ShaderHero.astro   トップのWebGLシェーダー背景
+│  ├─ WorkRow.astro      作品一覧の1行
+│  ├─ Header.astro / Footer.astro
+├─ layouts/Base.astro    共通のhead・ヘッダー・フッター
+├─ styles/global.css     配色・フォント・共通スタイル
+└─ content.config.ts     作品frontmatterの定義（必須項目のチェック）
+
+public/                  そのまま配信されるファイル
+└─ images/works/         作品のスクリーンショット置き場
+```
+
+## ローカルで動かす
+
+```bash
+npm install
+```
+
+```bash
+npm run dev
+```
+
+`http://localhost:4321` が開きます。ファイルを保存すると自動で反映されます。
+
+公開されるものと同じ状態を確認したいときは `npm run build` のあと `npm run preview`。
+
+## 作品を追加する
+
+`src/content/works/` に Markdown を1つ置けば、**一覧カードと詳細ページの両方が自動で生成されます。** ファイル名がそのまま URL になります（`nexus.md` → `/works/nexus/`）。
+
+```markdown
+---
+title: My Game
+period: 2026.04 - 2026.08     # 制作期間
+category: 個人開発
+role: メインプログラマー        # 個人開発など、書く必要がなければこの行ごと消す
+tech: ["C++", "DirectX"]      # ここに書いた技術が絞り込みボタンに出る
+summary: 一覧に出る1〜2行の概要。
+cover: /images/works/mygame.png   # 無ければこの行ごと消す（自動でプレースホルダ）
+order: 15                      # 小さいほど上に出る
+links:
+  - label: GitHub
+    url: https://github.com/Nerunell11/mygame
+---
+
+## 概要
+
+ここから下は普通の Markdown です。見出し、リスト、コードブロック、画像、表が使えます。
+
+## 技術的に取り組んだこと
+
+実装の判断や工夫をしっかり書ける場所です。
+```
+
+書きかけを公開したくないときは frontmatter に `draft: true` を足します。`npm run dev` では見えますが、本番ビルドからは除外されます。
+
+必須項目が抜けているとビルド時にエラーで教えてくれます（定義は `src/content.config.ts`）。
+
+> **注意**: 非公開（private）リポジトリの URL を `links` に入れても、他の人からは 404 に見えます。公開しているものだけ載せてください。
+
+## 画像を追加する
+
+`public/images/works/` に置いて、Markdown からは `/images/works/ファイル名` で参照します。本文中なら `![説明](/images/works/shot1.png)` でそのまま貼れます。
+
+## 文章・スキルを編集する
+
+| 直したいもの | 場所 |
+| --- | --- |
+| 名前・肩書き・ヒーローの文章 | `src/data/site.ts` の `SITE` |
+| About の本文 | `src/data/site.ts` の `ABOUT` |
+| About 右側の項目（所属など） | `src/data/site.ts` の `FACTS` |
+| スキル一覧 | `src/data/skills.ts` |
+ ``、画像と動画は `public/images/works/nexus/` |
 
 ## 配色・フォントを変える
 

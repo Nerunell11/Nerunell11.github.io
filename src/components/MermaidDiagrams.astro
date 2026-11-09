@@ -1,0 +1,88 @@
+---
+// ```mermaid のブロックを図に変換する。.prose の中が対象
+---
+
+<script>
+  // ```mermaid のブロックを図に置き換える。該当がなければ mermaid 本体は読み込まない
+  const blocks = Array.from(document.querySelectorAll<HTMLElement>('.prose pre > code.language-mermaid'));
+
+  if (blocks.length > 0) {
+    const { default: mermaid } = await import('mermaid');
+    const css = getComputedStyle(document.documentElement);
+    const v = (name: string) => css.getPropertyValue(name).trim();
+
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      // HTML ラベルはこのページの CSS と干渉して箱の大きさを測り違えるので、SVG のテキストで描く。
+      // その代わりクラス図のメンバー欄は箱の高さに入らないため、クラス図にはメンバーを書かない
+      htmlLabels: false,
+      flowchart: { useMaxWidth: false, htmlLabels: false },
+      // 日本語を自動で折り返すとハイフンが入るので wrap はせず、長いラベルは本文側で <br/> を入れる
+      sequence: { useMaxWidth: false, wrap: false, width: 120, actorMargin: 24, boxMargin: 6, messageMargin: 30 },
+      class: { useMaxWidth: false },
+      theme: 'base',
+      themeVariables: {
+        darkMode: true,
+        background: 'transparent',
+        // 変数のまま渡すと文字幅を別のフォントで測ってしまうので、解決済みのフォント名を渡す
+        fontFamily: getComputedStyle(document.body).fontFamily,
+        fontSize: '14px',
+        primaryColor: v('--surface-hi'),
+        primaryTextColor: v('--text'),
+        primaryBorderColor: v('--line-hi'),
+        secondaryColor: v('--surface'),
+        tertiaryColor: v('--bg-raise'),
+        lineColor: v('--text-dim'),
+        textColor: v('--text'),
+        noteBkgColor: v('--surface'),
+        noteTextColor: v('--text-dim'),
+        noteBorderColor: v('--accent-line'),
+        actorBkg: v('--surface-hi'),
+        actorBorder: v('--accent'),
+        actorTextColor: v('--text'),
+        signalColor: v('--text-dim'),
+        signalTextColor: v('--text'),
+        labelBoxBkgColor: v('--surface'),
+        labelBoxBorderColor: v('--line-hi'),
+        clusterBkg: v('--bg-raise'),
+        clusterBorder: v('--line-hi'),
+      },
+    });
+
+    for (const [i, code] of blocks.entries()) {
+      const pre = code.parentElement!;
+      const box = document.createElement('div');
+      box.className = 'diagram';
+      try {
+        const { svg } = await mermaid.render(`diagram-${i}`, code.textContent ?? '');
+
+        // Mermaid の計算した外枠はクラス図で小さすぎて下が切れるので、実際に描かれた範囲で取り直す。
+        // 閉じた節の中では大きさを測れないため、画面外の見える場所に一度置いて測る。
+        // 寸法は本来の大きさにし、枠より大きい場合だけ枠の幅まで縮める
+        const probe = document.createElement('div');
+        probe.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden';
+        probe.innerHTML = svg;
+        document.body.append(probe);
+        const el = probe.querySelector('svg');
+        if (el) {
+          const bb = el.getBBox();
+          const pad = 8;
+          const w = Math.ceil(bb.width + pad * 2);
+          const h = Math.ceil(bb.height + pad * 2);
+          el.setAttribute('viewBox', `${bb.x - pad} ${bb.y - pad} ${w} ${h}`);
+          el.setAttribute('width', String(w));
+          el.setAttribute('height', String(h));
+          el.style.maxWidth = '100%';
+          el.style.height = 'auto';
+          box.append(el);
+        }
+        probe.remove();
+        pre.replaceWith(box);
+      } catch (e) {
+        // 図にできなかった場合はコードのまま残す
+        console.error('mermaid:', e);
+      }
+    }
+  }
+</script>
