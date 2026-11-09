@@ -39,7 +39,9 @@ export const SKILLS: SkillGroup[] = [
       { name: 'Rider', icon: 'rider' },
       { name: 'Git / GitHub', icon: 'git' },
       { name: 'UVCS', mono: 'UVCS', note: 'Unity Version Control' },
+      { name: 'Perforce', icon: 'perforce' },
       { name: 'CMake', icon: 'cmake' },
+      { name: 'AWS', icon: 'amazonwebservices' },
     ],
   },
 ];
