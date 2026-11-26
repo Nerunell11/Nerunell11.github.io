@@ -19,3 +19,8 @@ Desktop.ini
 
 # Codex の出力
 out/
+
+# Slidev（public/slides はビルド成果物）
+public/slides/
+slides/node_modules/
+slides/dist/

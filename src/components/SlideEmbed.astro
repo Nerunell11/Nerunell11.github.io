@@ -1,0 +1,60 @@
+---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+interface Props {
+  deck: string;
+  title?: string;
+}
+
+const { deck, title } = Astro.props;
+const built = existsSync(join(process.cwd(), 'public', 'slides', deck, 'index.html'));
+// astro dev は public 配下のディレクトリ URL で index.html を返さないので、ファイル名まで書く
+const src = `/slides/${deck}/index.html`;
+---
+
+{
+  built ? (
+    <figure class="slide-embed">
+      <iframe src={src} loading="lazy" allowfullscreen title={title ? `${title} の技術解説スライド` : `技術解説スライド: ${deck}`} />
+      <figcaption>
+        <a href={src} target="_blank" rel="noopener">全画面で開く ↗</a>
+      </figcaption>
+    </figure>
+  ) : (
+    <p class="slide-embed-missing">
+      スライド {deck} は未ビルドです (<code>npm run slides:build</code>)
+    </p>
+  )
+}
+
+<style>
+  .slide-embed {
+    margin: 0 0 2rem;
+  }
+  .slide-embed iframe {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--bg-sink);
+  }
+  .slide-embed figcaption {
+    margin-top: 0.5rem;
+    text-align: right;
+    font-size: 0.85rem;
+  }
+  .slide-embed a {
+    color: var(--accent);
+  }
+  .slide-embed-missing {
+    margin: 0 0 2rem;
+    padding: 0.75rem 1rem;
+    border: 1px dashed var(--line);
+    border-radius: 4px;
+    background: var(--bg-sink);
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+</style>

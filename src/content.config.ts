@@ -41,6 +41,8 @@ const works = defineCollection({
     released: z.boolean().default(false),
     /** 受賞歴。label は一覧のバッジ、detail は詳細ページに出す */
     awards: z.array(z.object({ label: z.string(), detail: z.string().optional() })).default([]),
+    /** 技術解説スライド。slides/decks/<名前>.md の名前。書くと本文の上に埋め込まれる */
+    slides: z.string().optional(),
     /** 下書き。true の間は本番ビルドに出力されない */
     draft: z.boolean().default(false),
   }),
@@ -52,7 +54,10 @@ const works = defineCollection({
  */
 const nexus = defineCollection({
   loader: glob({ base: './src/content/nexus', pattern: '**/*.md' }),
-  schema: z.object({}),
+  schema: z.object({
+    /** 技術解説スライド。slides/decks/<名前>.md の名前。書くと本文の上に埋め込まれる */
+    slides: z.string().optional(),
+  }),
 });
 
 export const collections = { works, nexus };
