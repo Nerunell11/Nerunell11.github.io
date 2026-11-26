@@ -1,0 +1,13 @@
+{
+  "name": "neru-slides",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "slidev decks/sample.md",
+    "build": "node scripts/build-all.mjs"
+  },
+  "dependencies": {
+    "@slidev/cli": "^53.1.0",
+    "@slidev/theme-default": "^0.25.0"
+  }
+}

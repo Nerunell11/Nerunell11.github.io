@@ -1,0 +1,46 @@
+:root {
+  --slidev-theme-primary: #9fb5ec;
+}
+
+.slidev-layout {
+  background: #050505;
+  color: #f5f5f5;
+}
+
+.slidev-layout h1,
+.slidev-layout h2,
+.slidev-layout h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  color: #f5f5f5;
+}
+
+.slidev-layout h1 {
+  color: #9fb5ec;
+}
+
+.slidev-layout a {
+  color: #9fb5ec;
+}
+
+.slidev-layout blockquote,
+.slidev-layout p.dim,
+.slidev-layout .dim {
+  color: #a6a6a6;
+}
+
+.slidev-layout strong,
+.slidev-layout .accent {
+  color: #dd0ab1;
+}
+
+.slidev-layout hr,
+.slidev-layout table,
+.slidev-layout th,
+.slidev-layout td {
+  border-color: #262626;
+}
+
+.slidev-layout code,
+.slidev-layout pre {
+  font-family: 'JetBrains Mono', monospace;
+}

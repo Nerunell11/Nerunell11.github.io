@@ -1,5 +1,6 @@
 ---
 import { getEntry, render } from 'astro:content';
+import SlideEmbed from '../../../../components/SlideEmbed.astro';
 import NexusDoc from '../../../../layouts/NexusDoc.astro';
 import { DOC_MODULES, type MapModule } from '../../../../data/nexus-architecture';
 
@@ -19,5 +20,6 @@ const { Content } = await render(entry);
 ---
 
 <NexusDoc mod={mod} slug={slug}>
+  {entry.data.slides && <SlideEmbed deck={entry.data.slides} />}
   <Content />
 </NexusDoc>
