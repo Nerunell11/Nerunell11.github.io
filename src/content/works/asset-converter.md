@@ -7,6 +7,7 @@ summary: |-
   ゲームの2D素材を軽量化・圧縮・変換する Windows 専用の GUI ツール。
   Microsoft Store で公開しています。
 cover: /images/works/asset-converter-ui.webp
+slides: asset-converter
 order: 10
 featured: true
 released: true

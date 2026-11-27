@@ -8,6 +8,7 @@ summary: |-
   剣・盾・弓を切り替えて戦う、三人称視点の3Dアクション。
   武器をまたいでコンボをつなぎ、ステージ最奥のボスを目指します。
 cover: /images/works/trigear-title.webp
+slides: trigear
 order: 35
 links: []
 ---

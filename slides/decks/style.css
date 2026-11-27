@@ -44,3 +44,10 @@
 .slidev-layout pre {
   font-family: 'JetBrains Mono', monospace;
 }
+
+/* mermaid 図はスライドの中央に置く */
+.slidev-layout .mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}

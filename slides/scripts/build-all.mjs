@@ -1,4 +1,4 @@
-// decks/*.md を 1 つずつ Slidev でビルドし、../public/slides/<name>/ に出す。
+// decks/*.md (_ で始まるものを除く) を 1 つずつ Slidev でビルドし、../public/slides/<name>/ に出す。
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, rmSync, mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -11,7 +11,7 @@ rmSync(outRoot, { recursive: true, force: true });
 mkdirSync(outRoot, { recursive: true });
 
 const decks = readdirSync(join(root, 'decks'))
-  .filter((f) => f.endsWith('.md'))
+  .filter((f) => f.endsWith('.md') && !f.startsWith('_'))
   .map((f) => f.slice(0, -3));
 
 for (const name of decks) {
