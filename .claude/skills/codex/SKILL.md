@@ -1,42 +1,57 @@
 ---
 name: codex
-description: 単一のタスクをOpenAI Codex CLIワーカーに委譲する。「Codexにやらせて」「Codexで実装して」「Codexに調査させて」などの依頼や、作品本文の下書き・リポジトリ調査・機械的な編集で使う。
+description: OpenAI Codex CLI に差分のレビューを依頼する(read-only)。「Codexにレビューさせて」「Codexに見てもらって」「Codexに聞いて」などの依頼、および PR を作る前に使用。Codex に実装・下書きはさせない(実装と文章は Claude が行う)。
 ---
 
-# Codex へのタスク委譲
+# Codex へのレビュー依頼
 
-Codex CLI (`codex exec`) を非対話モードで起動し、1つのタスクを実行させる。
-Claude は発注者兼レビュアーとして、プロンプト作成と結果の検証に責任を持つ。
+実装・文章・検証は Claude が同じ文脈で行い、Codex には**別のモデルの目で差分を読ませる**。Codex は read-only で起動され、ファイルを書き換えない。レビューの観点と報告の形式は `AGENTS.md` にあるので、依頼文で繰り返さない。
 
-## 何を Codex に回すか
+## いつ頼むか
 
-- 他リポジトリ(`C:\dev\C++\Nexus` など)を読んで作品本文の材料を集める調査 → `-Sandbox read-only`
-- `src/content/works/*.md` の本文下書き、パスと変更内容が確定した機械的な編集 → `-Effort low`
-- Claude が自分でやるのは、ユーザーとの方針決め・文章の最終判断・diff レビューだけ
+- **PR を作る前に 1 回。** 作業のまとまり(PR 単位)が `npm run build` を通ってから。コミットごとには頼まない。
+- 省略してよいもの: 作品本文の文言だけの変更、README・CLAUDE.md などの文書だけの変更、数行の修正。
+- 再レビューは、重大な指摘を受けて大きく直したときだけ 1 回。指摘が軽微なら直して終える。
 
-## 手順
+## 1. 意図を書く(省略可)
 
-1. **プロンプトを自己完結にする。** Codex はこの会話を見えない。対象ファイルのパス、期待する変更、制約を全部書く。
-   **探索させない。** Codex の消費は「ターン数 × 文脈の大きさ」で決まる。読むべきファイル・節・行を指定し、全体を読ませない。
-   - 本文は日本語。frontmatter のスキーマは `src/content.config.ts`
-   - 検証は `npm run build` の末尾数行だけ見させる(全文ログを出させない)
-2. **委譲を実行する。** 原則 `codex-runner` エージェント (Haiku) に指示書・プロファイル・sandbox を渡して実行させ、
-   Codex のログをメインの文脈に入れない。プロファイルは `~/.codex/*.config.toml`:
-   `light` (gpt-6-luna / low: 調査・定型の書き換え)、`impl` (gpt-6.1-terra / medium: 本文下書き・実装)、
-   `deep` (gpt-6.1-sol / high: 原因不明の不具合)。直接呼ぶときは次の形 (長そうなら `run_in_background`):
+差分だけでは意図が読めないときに、`out/codex/prompts/<ID>.md` へ **5 行以内**で書く(日本語可。BOM はスクリプトが足す)。
 
-   ```powershell
-   ./scripts/codex-task.ps1 -PromptFile out/codex/task.prompt.md -Profile impl -OutFile out/codex/task.md
-   ./scripts/codex-task.ps1 -Prompt "<機械的な編集>" -Profile light -OutFile out/codex/task.md
-   ./scripts/codex-task.ps1 -Prompt "<調査>" -Profile light -Sandbox read-only -OutFile out/codex/answer.md
-   ```
+```markdown
+## 意図
+(何を、なぜ変えたか。1〜3 行)
+## 特に見てほしい点
+(リンクのパス・スキーマ変更の追従・狭い画面など、自信が無いところ。無ければ省略)
+```
 
-   - Windows の codex はサンドボックスが効かないため、書き込みタスクの既定は `danger-full-access`。範囲を厳密に指示し、終了後に必ず `git diff` を見る。
-3. **結果を検証する。** `-OutFile` を読み、`git diff` を確認し、`npm run build` が通ることを確かめる。
-4. **報告では Codex の成果と Claude の修正を区別する。**
+## 2. 実行する
 
-## Claude 側の節約ルール
+```powershell
+git fetch origin main
+```
 
-- ブラウザのスクリーンショットは見た目を変えたときだけ。文言変更は build と curl で足りる
-- 長い README / ADR を Claude が直接読まない。必要な節だけ Codex に要約させる
-- ユーザーへの報告は短く。変えたこと・確認したこと・残りだけ
+```powershell
+./scripts/codex-task.ps1 -Review -OutFile out/codex/<ID>.md -LogFile out/codex/logs/<ID>.codex.log
+```
+
+- 比較の相手は既定で `origin/main`(worktree のローカル `main` は古いことが多いので、先に fetch する)。
+- 手順 1 の意図ファイルを書いたときは `-PromptFile out/codex/prompts/<ID>.md` を足す。
+- `run_in_background` で起動し、終了通知を待つ。ポーリングしない。**`-LogFile` は必ず付ける**(付ければ画面には終了コードと報告のパスしか出ない)。
+- 対象は `origin/main` とのマージベースから作業ツリーまで(コミット済み + 未コミット + 未追跡)。未コミットだけなら `-Uncommitted`、別の相手なら `-Base <ref>`。
+- `-Effort high` は、コンテンツのスキーマ・共通レイアウト・ビルド設定に触るときだけ。
+- 利用上限・認証エラーで exit 1 になったら、レビューなしで進めてよいかをユーザーに確認する(代わりに `/code-review` を使う手もある)。
+
+## 3. 採否を決めて直す
+
+1. `out/codex/<ID>.md` **だけ**を読む(要約 + `[P1]`〜`[P3]` の指摘)。ログは読まない。
+2. 指摘ごとに該当箇所を確かめ、採用・不採用を決める。**判定の責任は Claude にある**(採らない理由は 1 行で残す)。
+3. 採用した指摘は**このセッションで**直し、`npm run build` を通す。
+4. ユーザーへの報告には、指摘の件数・採用したもの・採らなかったものと理由を書く。
+
+## 質問だけしたいとき
+
+差分のレビューでない相談は `-Review` を外す。質問を `out/codex/prompts/<ID>.md` に自己完結で書き(Codex はこの会話を見えない)、読むべきファイルと行番号を挙げる。
+
+```powershell
+./scripts/codex-task.ps1 -PromptFile out/codex/prompts/<ID>.md -OutFile out/codex/<ID>.md -LogFile out/codex/logs/<ID>.codex.log
+```
