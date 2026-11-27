@@ -1,6 +1,6 @@
 ---
 name: writer
-description: 作品ページ (src/content/works/*.md)・README・プロフィール文言の下書きと更新を行う (Sonnet)。何を書くか・どの事実を使うかは呼び出し元が決め、文章化と既存ページとの書式の統一を任せる。Codex が使えないときの本文下書きにも使う。
+description: 作品ページ (src/content/works/*.md)・README・プロフィール文言の下書きと更新を行う (Sonnet)。何を書くか・どの事実を使うかは呼び出し元が決め、文章化と既存ページとの書式の統一を任せる。
 model: sonnet
 tools: Read, Edit, Write, Grep, Glob
 ---
