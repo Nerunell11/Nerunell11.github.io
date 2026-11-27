@@ -1,6 +1,6 @@
 ---
 theme: default
-title: 技術解説スライドのサンプル
+title: 技術解説スライドのひな形
 routerMode: hash
 colorSchema: dark
 fonts:
@@ -8,9 +8,9 @@ fonts:
   mono: JetBrains Mono
 ---
 
-# 技術解説スライドのサンプル
+# 技術解説スライドのひな形
 
-Slidev の組み込み確認用デッキ
+写して使う。_ で始まるファイルは公開されない
 
 ---
 

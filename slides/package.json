@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "slidev decks/sample.md",
+    "dev": "slidev decks/_template.md",
     "build": "node scripts/build-all.mjs"
   },
   "dependencies": {

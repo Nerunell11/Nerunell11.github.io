@@ -8,6 +8,7 @@ summary: |-
   初めてのチーム制作で作ったタワーディフェンスゲーム。
   大量の敵を同時に出しても高いパフォーマンスを保てるように設計しました。
 cover: /images/works/sentiment-title.webp
+slides: sentiment
 order: 40
 awards:
   - label: 進級制作展（HAL EVENT WEEK）ビジュアル賞

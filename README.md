@@ -84,7 +84,7 @@ links:
 
 スライドは Slidev で作ります。`slides/` はサイト本体とは別の npm プロジェクトです。
 
-1. `slides/decks/<名前>.md` を置きます（`sample.md` を写すのが早いです）。
+1. `slides/decks/<名前>.md` を置きます（`_template.md` を写すのが早いです。`_` で始まるファイルはビルドされません）。
 2. 初回だけ `cd slides` して `npm install` します。
 3. 編集中は `slides/` で `npx slidev decks/<名前>.md` を実行し、http://localhost:3030 で確認します。
 4. 作品または Nexus 解説の frontmatter に `slides: <名前>` と書くと、本文の上に埋め込まれます。

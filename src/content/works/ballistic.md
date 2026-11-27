@@ -8,6 +8,7 @@ summary: |-
   3対3のサッカーと三人称シューターを組み合わせた対戦ゲーム。
   最大6人のオンライン対戦に対応しています。
 cover: /images/works/ballistic-key.webp
+slides: ballistic
 order: 32
 ongoing: true
 links: []

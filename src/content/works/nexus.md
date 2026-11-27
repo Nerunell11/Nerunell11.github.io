@@ -7,6 +7,7 @@ summary: |-
   C++20 でフルスクラッチ開発している 2D/3D ゲームエンジン。
   並列ECSを中核に据え、DirectX 12 と Vulkan を自作のRHIで抽象化しています。
 cover: /images/works/nexus-nightcrossing-cover.webp
+slides: nexus
 order: 20
 featured: true
 ongoing: true
